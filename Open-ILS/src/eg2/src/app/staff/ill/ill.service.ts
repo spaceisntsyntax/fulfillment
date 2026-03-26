@@ -227,6 +227,10 @@ export class ILLService {
                         if (i.hold.current_shelf_lib()) {
                             i.hold.current_shelf_lib(this.org.get(i.hold.current_shelf_lib()));
                         }
+
+                        if (i.hold.transit() && !i.transit) { // copy the transit "up"
+                            i.transit = i.hold.transit();
+                        }
                     }
                 }
 
