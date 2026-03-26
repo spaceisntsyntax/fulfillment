@@ -22,7 +22,7 @@
 <ng-template #titleTemplate let-r="row">
   <ng-container *ngIf="r.record">
     <a *ngIf="!illMode" routerLink="/staff/catalog/record/{{r.record.id()}}">{{r.title}}</a>
-    <a *ngIf="illMode" href="/eg/staff/cat/catalog/record/{{r.record.id()}}">{{r.title}}</a>
+    <a *ngIf="illMode" href="/eg/opac/record/{{r.record.id()}}">{{r.title}}</a>
   </ng-container>
   <ng-container *ngIf="!r.record">{{r.title}}</ng-container>
 </ng-template>

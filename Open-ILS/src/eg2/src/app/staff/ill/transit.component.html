@@ -13,7 +13,7 @@
 </ng-template>
 
 <ng-template #titleTmpl  let-row="row">
-  <a href="/eg/staff/cat/catalog/record/{{row.target_copy().call_number().record().id()}}" target="_blank">
+  <a href="/eg/opac/record/{{row.target_copy().call_number().record().id()}}" target="_blank">
     {{row.target_copy().call_number().record().wide_display_entry().title()}}
   </a>
 </ng-template>

@@ -729,7 +729,7 @@ export class HoldsGridComponent implements OnInit {
         const bibIds = Array.from(new Set( rows.map(r => r.record_id) ));
         bibIds.forEach( bibId => {
             // const url = '/eg/staff/cat/catalog/record/' + bibId;
-            const url = '/eg2/staff/catalog/record/' + bibId;
+            const url = '/eg/opac/record/' + bibId;
             window.open(url, '_blank');
         });
     }

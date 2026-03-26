@@ -270,7 +270,7 @@
         <a *ngIf="!illMode" routerLink="/staff/catalog/record/{{hold.record_id}}" target="_blank">
           {{hold.title}}
         </a>
-        <a *ngIf="illMode" href="/eg/staff/cat/catalog/record/{{hold.record_id}}" target="_blank">
+        <a *ngIf="illMode" href="/eg/opac/record/{{hold.record_id}}" target="_blank">
           {{hold.title}}
         </a>
       </ng-template>

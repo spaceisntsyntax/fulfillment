@@ -101,7 +101,7 @@
           <td i18n>Title:</td>
           <td>
             <a i18n *ngIf="disposition.copy.source_lib()" target="_blank"
-              href="/eg/staff/cat/catalog/record/{{disposition.copy.call_number().record().id()}}">
+              href="/eg/opac/record/{{disposition.copy.call_number().record().id()}}">
               {{disposition.wideDisplayFields.title()}}
             </a>
           </td>
