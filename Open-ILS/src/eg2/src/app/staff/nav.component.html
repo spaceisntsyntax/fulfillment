@@ -12,7 +12,7 @@
     aria-label="Home" i18n-aria-label
     egAccessKey keyCtx="navbar" i18n-keySpec i18n-keyDesc
     keySpec="alt+h" keyDesc="Navigate Home">
-    <span class="material-icons" aria-hidden="true" title="Home: Alt+H">home</span>
+    <span class="material-icons" aria-hidden="true">home</span>
     <span class="visually-hidden" i18n>Home</span>
   </a>
   <button class="navbar-toggler text-light" type="button" (click)="isMenuCollapsed = !isMenuCollapsed">&#9776;</button>
@@ -882,17 +882,17 @@
           <button type="button" class="dropdown-item" ngbDropdownItem
             (click)="changeColorMode('light')">
             <span class="material-icons" aria-hidden="true">light_mode</span>
-            <span i18n>Light</span>
+            <span i18n>Light color mode</span>
           </button>
           <button type="button" class="dropdown-item" ngbDropdownItem
             (click)="changeColorMode('dark')">
             <span class="material-icons" aria-hidden="true">nightlight</span>
-            <span i18n>Dark</span>
+            <span i18n>Dark color mode</span>
           </button>
           <button type="button" class="dropdown-item" ngbDropdownItem
             (click)="changeColorMode('auto')">
             <span class="material-icons" aria-hidden="true">brightness_medium</span>
-            <span i18n>Auto</span>
+            <span i18n>Automatic color mode, follows browser</span>
           </button>
         </div>
       </div>
@@ -904,9 +904,9 @@
         <!-- Desktop button: list icon, no caret, no words -->
         <button ngbDropdownToggle *ngIf="isMenuCollapsed" type="button"
           i18n-title title="Show user options"
-          i18n-aria-label aria-label="Show user options"
+          i18n-aria-label aria-label="Change operator, logout, about Fulfillment, and keyboard shortcuts"
           class="nav-link dropdown-toggle no-caret with-material-icon">
-          <span class="d-none d-lg-inline material-icons" aria-hidden="true">list</span>
+          <span class="d-none d-lg-inline material-icons" aria-hidden="true">person</span>
         </button>
         <!-- Mobile button: no icon, caret, words -->
         <button ngbDropdownToggle *ngIf="!isMenuCollapsed" type="button"
