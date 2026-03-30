@@ -2,12 +2,12 @@
 
 <div class="row mb-3 pb-3 border-bottom">
   <div class="row form-inline">
-    <div class="col-lg-4 d-flex">
-      <div class="input-group">
+    <div class="col-lg-4">
+      <div class="input-group d-flex flex-wrap">
         <label for="sstsBarcodeInput" class="input-group-text" i18n>Scan Item Barcode</label>
         <input type="text" class="form-control" id="sstsBarcodeInput"
           [(ngModel)]="barcode" (focus)="$event.target.select()"
-          i18n-aria-label aria-label="Barcode Input" (keydown.enter)="takeBarcode()" />
+          (keydown.enter)="takeBarcode()" />
         <button type="button" class="btn btn-outline-dark" [disabled]="action_pending"
           (keydown.enter)="takeBarcode()" (click)="takeBarcode()" i18n>Go!</button>
       </div>
@@ -25,7 +25,7 @@
      </div>
     </div>
     <div class="col-lg-8">
-     <div class="float-end btn-group">
+     <div class="float-end btn-group d-flex-inline flex-wrap">
        <button type="button" class="btn btn-outline-dark" [disabled]="action_pending"
          (click)="popup_block_ill()"
          *ngIf="dispositionDetails?.mine && (disposition && !disposition?.blocked)"
