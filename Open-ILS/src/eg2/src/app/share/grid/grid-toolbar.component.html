@@ -84,7 +84,7 @@
   <div class="eg-grid-selection-count" id="{{gridContext.gridDomId}}-selection-count" *ngIf="!gridContext.disableSelect" i18n>
     {{gridContext.getSelectedRows().length}} selected
   </div>
-  <div class="btn-group">
+  <div class="btn-group d-inline-flex flex-wrap">
     <ng-container *ngIf="!gridContext.disableSelect">
       <div ngbDropdown autoClose="false" class="btn-group" placement="bottom-right"
         (openChange)="gridContext.resizeWrapper = !gridContext.resizeWrapper">

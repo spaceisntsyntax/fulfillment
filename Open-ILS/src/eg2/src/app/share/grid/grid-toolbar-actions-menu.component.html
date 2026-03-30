@@ -1,10 +1,12 @@
 <!-- Copy To Clipboard is only displayed when using a row-specific
      context menu as the entry point. -->
+<!-- commenting this functionality out because it breaks a11y.
 <button *ngIf="viaContextMenu" class="dropdown-item"
   (click)="openCopyToClipboard()" type="button">
   <div i18n>Copy to Clipboard</div>
   <div class="dropdown-divider"></div>
 </button>
+-->
 
 <eg-clipboard-dialog #clipboardDialog></eg-clipboard-dialog>
 

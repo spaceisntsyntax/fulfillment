@@ -50,7 +50,7 @@ export class ButtonStyleDirective {
             }
         } else {
             // sane? somewhere along the line we made some buttons very plain and not obviously buttons
-            this.renderer.addClass(this.el.nativeElement, 'btn-normal');
+            this.renderer.addClass(this.el.nativeElement, 'btn-outline-dark');
         }
     }
 }
