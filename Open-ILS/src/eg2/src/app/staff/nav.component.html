@@ -864,18 +864,15 @@
 
     <div class="navbar-nav" [ngClass]="{'ms-auto': !user()}">
       <div ngbDropdown class="nav-item dropdown color-mode-toggle" display="dynamic">
-        <button type="button" ngbDropdownToggle class="nav-link dropdown-toggle with-material-icon">
+          <button type="button" ngbDropdownToggle i18n-title title="Change color mode" class="nav-link dropdown-toggle with-material-icon">
           <ng-container *ngIf="colorMode === 'light'">
-            <span class="material-icons" title="Current color mode: Light" i18n-title aria-hidden="true">light_mode</span>
-            <span class="visually-hidden" i18n>Current color mode: Light</span>
+            <span class="material-icons" aria-hidden="true">light_mode</span>
           </ng-container>
           <ng-container *ngIf="colorMode === 'dark'">
-            <span class="material-icons" title="Current color mode: Dark" i18n-title aria-hidden="true">nightlight</span>
-            <span class="visually-hidden" i18n>Current color mode: Dark</span>
+            <span class="material-icons" aria-hidden="true">nightlight</span>
           </ng-container>
           <ng-container *ngIf="!colorMode || colorMode === 'auto'">
-            <span class="material-icons" title="Current color mode: Auto" i18n-title aria-hidden="true">brightness_medium</span>
-            <span class="visually-hidden" i18n>Current color mode: Auto</span>
+            <span class="material-icons" aria-hidden="true">brightness_medium</span>
           </ng-container>
         </button>
         <div class="dropdown-menu color-mode" ngbDropdownMenu>
@@ -904,7 +901,7 @@
         <!-- Desktop button: list icon, no caret, no words -->
         <button ngbDropdownToggle *ngIf="isMenuCollapsed" type="button"
           i18n-title title="Show user options"
-          i18n-aria-label aria-label="Change operator, logout, about Fulfillment, and keyboard shortcuts"
+          i18n-aria-label aria-label="Account"
           class="nav-link dropdown-toggle no-caret with-material-icon">
           <span class="d-none d-lg-inline material-icons" aria-hidden="true">person</span>
         </button>
