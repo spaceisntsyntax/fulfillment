@@ -366,7 +366,7 @@
                                 </div>
 
                                 <div class="action_buttons col-sm-auto col-md-4 col-lg-4 col-xl-3 d-flex justify-content-end align-items-start">                            
-                                <div class="result_table_utils btn-group-vertical" >
+                                <div class="[% IF !ctx.authtoken; 'hide_me '; END %]result_table_utils btn-group-vertical" >
                                 [%- search_ou = ctx.search_ou;
                                     num_holdable_copies = attrs.marc_xml.findnodes('//*[local-name()="holdings" and @has_holdable="true"]').size || 0;
                                     IF ctx.place_unfillable || (num_holdable_copies > 0 && (ctx.holds_block.enabled != 'true' || attrs.org_copy_counts.$search_ou.available == 0))
@@ -387,7 +387,7 @@
                                 
                                 <a href="[% mkurl(ctx.opac_root _ '/place_hold', add_parms, del_parms) %]"
                                     [%- html_text_attr('aria-describedby', 'record_' _ rec.id); -%]
-                                    class="[% IF !ctx.authtoken; 'hide_me '; END %]btn btn-action text-start" rel="nofollow" vocab="">
+                                    class="btn btn-action text-start" rel="nofollow" vocab="">
                                     <span role="text">
                                         <i class="fas fa-check" aria-hidden="true"></i>
                                         <span class="result_place_hold">
