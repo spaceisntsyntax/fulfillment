@@ -35,8 +35,8 @@
         consortium.[% END %]
     </p>
     <p>[% |l(
-    '<a href="https://www.equinoxoli.org/products/fulfillment/">https://www.equinoxoli.org/products/fulfillment/</a>',
-    '<a href="/fulfillment-ill-documentation.pdf">fulfillment-ill-documentation.pdf</a>') 
+    '<a target="_blank" href="https://www.equinoxoli.org/products/fulfillment/">https://www.equinoxoli.org/products/fulfillment/</a>',
+    '<a target="_blank" href="/fulfillment-ill-documentation.pdf">fulfillment-ill-documentation.pdf</a>') 
      %]More information can be found at [_1]. For help in using Fulfillment, 
        see our documentation at [_2].[% END %]
     </p>

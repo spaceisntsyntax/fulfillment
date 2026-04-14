@@ -19421,7 +19421,7 @@ VALUES
 ,   ( 5, 2, 0, 'header',        oils_i18n_gettext( 5, 'Bibliographic Search', 'cusppe', 'label'), NULL, NULL, NULL, 1)
 ,   ( 6, 2, 1, 'catalogsearch', oils_i18n_gettext( 6, 'Search Catalog', 'cusppe', 'label'), NULL, NULL, NULL, 1)
 ,   ( 9, 3, 0, 'header',        oils_i18n_gettext( 9, 'Administration', 'cusppe', 'label'), NULL, NULL, NULL, 1)
-,   (10, 3, 1, 'link',          oils_i18n_gettext(10, 'Fulfillment Documentation', 'cusppe', 'label'), '/images/portal/helpdesk.png', 'https://docs.evergreen-ils.org', TRUE, 1)
+,   (10, 3, 1, 'link',          oils_i18n_gettext(10, 'Fulfillment Documentation', 'cusppe', 'label'), '/images/portal/helpdesk.png', '/fulfillment-ill-documentation.pdf', TRUE, 1)
 ,   (11, 3, 2, 'menuitem',      oils_i18n_gettext(11, 'Workstation Administration', 'cusppe', 'label'), '/images/portal/helpdesk.png', '/eg/staff/admin/workstation/index', NULL, 1)
 ;
 
