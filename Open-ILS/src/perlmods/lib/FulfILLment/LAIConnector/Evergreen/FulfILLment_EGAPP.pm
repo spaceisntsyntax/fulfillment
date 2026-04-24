@@ -285,7 +285,7 @@ sub recursive_hash {
             $$obj{$_} = recursive_hash($$obj{$_}) for (keys %$obj);
         } elsif (ref($obj) =~ /ARRAY/) {
             $obj = [ map { recursive_hash($_) } @$obj ];
-        } else {
+        } elsif (ref($obj) =~ /HASH/) {
             $$obj{$_} = recursive_hash($$obj{$_}) for (keys %$obj);
         }
     }
