@@ -2296,43 +2296,47 @@ __PACKAGE__->register_method(
 );
 
 sub copy_block_hold {
-   my( $self, $conn, $auth, $copy_id, $reason, $hold_id ) = @_;
-   my $e = new_editor(authtoken=>$auth, xact=>1);
-   return $e->die_event unless $e->checkauth;
-   my ($reqr, $evt) = $U->checksesperm($auth, 'UPDATE_HOLD');
-   return $evt if $evt;
+    my( $self, $conn, $auth, $copy_id, $reason, $hold_id, $stop_date ) = @_;
+    my $e = new_editor(authtoken=>$auth, xact=>1);
+    return $e->die_event unless $e->checkauth;
+    my ($reqr, $evt) = $U->checksesperm($auth, 'UPDATE_HOLD');
+    return $evt if $evt;
 
-   my $copy = $e->retrieve_asset_copy($copy_id)
-      or return $e->die_event;
+    $stop_date = undef if $hold_id; # belt and suspenders
+    $stop_date = undef unless $stop_date =~ /^\d{4}-\d{2}-\d{2}$/; # belt and suspenders
 
-   my $block = $e->search_action_copy_block_hold({item => $copy_id, hold => $hold_id})->[0];
-   if (!$block and $hold_id) { # check for universal block
-   	$block = $e->search_action_copy_block_hold({item => $copy_id, hold => undef})->[0];
-   }
+    my $copy = $e->retrieve_asset_copy($copy_id)
+        or return $e->die_event;
 
-   if (!$block) {
-      $block = Fieldmapper::action::copy_block_hold->new;
-      $block->item($copy_id);
-      $block->hold($hold_id);
-      $block->reason($reason);
-      $block->staff($reqr->id);
-      $e->create_action_copy_block_hold($block) or return $e->die_event;
-   }
+    my $block = $e->search_action_copy_block_hold({item => $copy_id, hold => $hold_id})->[0];
+    if (!$block and $hold_id) { # check for universal block
+        $block = $e->search_action_copy_block_hold({item => $copy_id, hold => undef})->[0];
+    }
 
-   my $map_search = {target_copy => $copy_id};
-   $$map_search{hold} = $hold_id if $hold_id;
+    if (!$block or $stop_date) {
+        $block = Fieldmapper::action::copy_block_hold->new;
+        $block->item($copy_id);
+        $block->hold($hold_id);
+        $block->reason($reason);
+        $block->block_stop($stop_date);
+        $block->staff($reqr->id);
+        $e->create_action_copy_block_hold($block) or return $e->die_event;
+    }
 
-   my $maps = $e->search_action_hold_copy_map($map_search);
-   my @holds;
-   for (@$maps) {
-      push @holds, $_->hold;
-      $e->delete_action_hold_copy_map($_) or return $e->event;
-   }
+    my $map_search = {target_copy => $copy_id};
+    $$map_search{hold} = $hold_id if $hold_id;
 
-   $e->commit;
+    my $maps = $e->search_action_hold_copy_map($map_search);
+    my @holds;
+    for (@$maps) {
+        push @holds, $_->hold;
+        $e->delete_action_hold_copy_map($_) or return $e->event;
+    }
 
-   reset_hold($self, $conn, $auth, $_) for @holds;
-   return $block->id;
+    $e->commit;
+
+    reset_hold($self, $conn, $auth, $_) for @holds;
+    return $block->id;
 }
 
 __PACKAGE__->register_method(

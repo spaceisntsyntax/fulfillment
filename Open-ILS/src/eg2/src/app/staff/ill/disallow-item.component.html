@@ -30,6 +30,15 @@
       </div>
     </div>
 
+    <div class="row mt-2">
+      <div class="col-lg-3 fw-bold" i18n>Block duration</div>
+      <div class="col-lg-9">
+        <label class="ms-2 form-label form-check-label"
+          for="block-all-end-date" i18n>Block item until</label>
+        <eg-date-select [disabled]="!blockAll" domId="block-all-end-date" (onChangeAsYmd)="blockStop = $event"/>
+      </div>
+    </div>
+
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-success"

@@ -261,7 +261,14 @@ export class ILLService {
                 return [];
             }
             return this.pcrud.search(
-                'acbh', {item: list.map(i => i.copy.id()), hold:null},
+                'acbh',
+                { item: list.map(i => i.copy.id()),
+                  hold:null, // only global blocks can be unset, which is all this is used for
+                  '-or': [
+                      {block_stop: null},       // either blocked "forever" or...
+                      {block_stop: {'>':'now'}} // "now" is before the designated end date
+                  ]
+                },
                 {}, {atomic: true}
             ).toPromise().then(blocks => {
                 const blocked_item_ids = blocks.map(b => b.item());

@@ -14,6 +14,7 @@ export interface DisallowDialogResult {
     rejected: boolean;
     blockAll?: boolean;
     blockReason?: string;
+    blockStop?: string;
 }
 
 @Component({
@@ -27,6 +28,7 @@ export class DisallowItemComponent extends DialogComponent {
     @Input() willCancelTransit = false;
     @Input() currentlyTargeted = false;
 
+    blockStop = '';
     blockAll = true;
     blockReason = 'policy';
 
@@ -47,6 +49,7 @@ export class DisallowItemComponent extends DialogComponent {
         const res = {
             rejected: false,
             blockAll: this.blockAll,
+            blockStop: this.blockStop,
             blockReason: this.blockReason
         };
 

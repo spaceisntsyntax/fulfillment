@@ -2395,7 +2395,12 @@ sub collect_copy_transactions {
     $resp{copy}->call_number->record->clear_marc;
 
     $resp{hold_blocks} = $e->search_action_copy_block_hold([
-        { item => $resp{copy}->id },
+        { item => $resp{copy}->id,
+          '-or' => [
+              {block_stop => undef},
+              {block_stop => {'>' => 'now'}}
+          ]
+        },
         { order_by => {acbh => 'block_time DESC'},
           flesh => 2,
           flesh_fields => { au => ['card'], acbh => ['staff', 'hold'] }

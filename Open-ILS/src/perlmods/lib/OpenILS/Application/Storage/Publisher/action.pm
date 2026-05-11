@@ -1377,7 +1377,11 @@ sub new_hold_copy_targeter {
 
             # Filter blocked copies
             $all_copies = [ grep {
-                !action::copy_block_hold->search_where( { hold => undef, item => $_->id } ) &&
+                !action::copy_block_hold->search_where( {
+                    hold => undef, # when the block is global, the block_stop must be null OR after NOW() to block holds
+                    item => $_->id,
+                    '-or' => [ {block_stop => undef}, {block_stop => {'>' => 'now'}} ]
+                } ) &&
                 !action::copy_block_hold->search_where( { hold => $hold->id, item => $_->id } )
             } @$all_copies ];
            

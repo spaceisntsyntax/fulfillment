@@ -2677,11 +2677,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 	<class id="acbh" controller="open-ils.cstore open-ils.pcrud" oils_obj:fieldmapper="action::copy_block_hold" oils_persist:tablename="action.copy_block_hold" reporter:core="true" reporter:label="Copy Block Hold">
 		<fields oils_persist:primary="id" oils_persist:sequence="action.copy_block_hold_id_seq">
 			<field reporter:label="Use ID" name="id" reporter:datatype="id" />
-			<field reporter:label="Copy" name="item" reporter:datatype="link" />
+			<field reporter:label="Copy" name="item" reporter:datatype="link" oils_obj:required="true"/>
 			<field reporter:label="Hold" name="hold" reporter:datatype="link"/>
 			<field reporter:label="Reason" name="reason" reporter:datatype="text"/>
-			<field reporter:label="Recording Staff" name="staff" reporter:datatype="link"/>
-			<field reporter:label="Block Date/Time" name="block_time" reporter:datatype="timestamp"/>
+			<field reporter:label="Recording Staff" name="staff" reporter:datatype="link" oils_obj:required="true"/>
+			<field reporter:label="Start Block Date/Time" name="block_time" reporter:datatype="timestamp" oils_obj:required="true"/>
+			<field reporter:label="Global End Block Date/Time" name="block_stop" reporter:datatype="timestamp"/>
 		</fields>
 		<links>
 			<link field="item" reltype="has_a" key="id" map="" class="acp"/>

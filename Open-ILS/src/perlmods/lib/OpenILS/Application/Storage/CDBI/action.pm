@@ -10,7 +10,7 @@ package action::copy_block_hold;
 use base qw/action/;
 __PACKAGE__->table('action.copy_block_hold');
 __PACKAGE__->columns(Primary => 'id');
-__PACKAGE__->columns(Essential => qw/item hold reason staff block_time/);
+__PACKAGE__->columns(Essential => qw/item hold reason staff block_time block_stop/);
 #-------------------------------------------------------------------------------
 
 package action::in_house_use;

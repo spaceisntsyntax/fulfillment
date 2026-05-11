@@ -104,11 +104,12 @@ export class SingleScanComponent implements OnInit, AfterViewInit {
 
         if (!result.rejected) {
             const block_scope = result.blockAll ? 'block_all' : 'block_one';
+            const block_end = block_scope == 'block_all' ? result.blockStop || null : null;
 
             if (this.disposition.open_transit) {
-                return this.abort_transit().then(() => this[block_scope](result.blockReason));
+                return this.abort_transit().then(() => this[block_scope](result.blockReason, block_end));
             } else {
-                return this[block_scope](result.blockReason);
+                return this[block_scope](result.blockReason, block_end);
             }
         } else {
             console.debug('hold blocking canceled');
@@ -117,7 +118,7 @@ export class SingleScanComponent implements OnInit, AfterViewInit {
         return Promise.resolve(true);
     }
 
-    block_one(reason: string, active_dispo?: ActionContext): Promise<any> {
+    block_one(reason: string, block_end, active_dispo?: ActionContext): Promise<any> {
         const old = this.swap_dispo(active_dispo);
         this.action_pending = true;
 
@@ -132,7 +133,7 @@ export class SingleScanComponent implements OnInit, AfterViewInit {
         }).then(() => this.takeBarcode());
     }
 
-    block_all(reason: string, active_dispo?: ActionContext): Promise<any> {
+    block_all(reason: string, block_end, active_dispo?: ActionContext): Promise<any> {
         const old = this.swap_dispo(active_dispo);
         this.action_pending = true;
 
@@ -140,7 +141,7 @@ export class SingleScanComponent implements OnInit, AfterViewInit {
 
         return this.ill.circAPIRequest(
             'open-ils.circ.hold.block',
-            this.disposition.copy.id(), reason
+            this.disposition.copy.id(), reason, null, block_end
         ).then(() => {
             this.action_pending = false;
             this.swap_dispo(old);

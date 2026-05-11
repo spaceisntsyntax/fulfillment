@@ -123,14 +123,15 @@ export class PendingRequestsComponent implements OnInit {
                         ).toPromise().then( result => {
                             if (!result.rejected) {
                                 const block_scope = result.blockAll ? 'block_all' : 'block_one';
+                                const block_end = block_scope == 'block_all' ? result.blockStop || null : null;
 
                                 if (!!disposition.open_transit) {
                                     return this.ill.circAPIRequest(
                                         'open-ils.circ.transit.abort',
                                         {transitid : disposition.transit.id()}
-                                    ).then(() => this[block_scope](result.blockReason, disposition));
+                                    ).then(() => this[block_scope](result.blockReason, disposition, block_end));
                                 } else {
-                                    return this[block_scope](result.blockReason, disposition);
+                                    return this[block_scope](result.blockReason, disposition, block_end);
                                 }
                             } else {
                                 console.debug('hold blocking canceled');
@@ -147,7 +148,7 @@ export class PendingRequestsComponent implements OnInit {
         return Promise.all(promises);
     }
 
-    block_one(reason: string, disposition): Promise<any> {
+    block_one(reason: string, disposition, block_end): Promise<any> {
         console.debug('blocking one hold: ' + disposition.hold.id());
 
         return this.ill.circAPIRequest(
@@ -156,12 +157,12 @@ export class PendingRequestsComponent implements OnInit {
         );
     }
 
-    block_all(reason: string, disposition): Promise<any> {
+    block_all(reason: string, disposition, block_end): Promise<any> {
         console.debug('blocking all holds for barcode '+disposition.copy.barcode());
 
         return this.ill.circAPIRequest(
             'open-ils.circ.hold.block',
-            disposition.copy.id(), reason
+            disposition.copy.id(), reason, null, block_end
         );
     }
 }
