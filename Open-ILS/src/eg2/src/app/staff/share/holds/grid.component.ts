@@ -443,7 +443,7 @@ export class HoldsGridComponent implements OnInit {
 
     applyFilters(): any {
 
-        const filters: any = {};
+        const filters: any = {is_staff_request:'true'};
 
         if (this.copyLocationIds.length) {
             filters['acpl.id'] = this.copyLocationIds;

@@ -18,7 +18,7 @@
         [customActions]="customActions.borrower"
         [currentShelfLib]="contextOrg"
         [defaultSort]="[{name:'request_time',dir:'asc'}, {name:'id',dir:'asc'}]"
-        showFields="id,current_item,title,shelf_time,ucard_barcode,shelf_expire_time"
+        showFields="id,current_item,title,shelf_time,ucard_barcode,shelf_expire_time,note_count"
       />
     </ng-template>
   </li>
@@ -40,7 +40,7 @@
         [customActions]="customActions.lender"
         [currentShelfLib]="{not:contextOrg}"
         [defaultSort]="[{name:'request_time',dir:'asc'}, {name:'id',dir:'asc'}]"
-        showFields="id,csl_shortname,current_item,title,shelf_time,ucard_barcode,shelf_expire_time"
+        showFields="id,csl_shortname,current_item,title,shelf_time,ucard_barcode,shelf_expire_time,note_count"
       />
     </ng-template>
   </li>
