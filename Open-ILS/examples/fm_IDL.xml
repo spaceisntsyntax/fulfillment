@@ -6980,6 +6980,7 @@ SELECT  usr,
 		<permacrud xmlns="http://open-ils.org/spec/opensrf/IDL/permacrud/v1">
 			<actions>
 				<retrieve permission="VIEW_HOLD" context_field="pickup_lib"/>
+				<update permission="UPDATE_HOLD" context_field="selection_ou"/>
 			</actions>
 		</permacrud>
 	</class>

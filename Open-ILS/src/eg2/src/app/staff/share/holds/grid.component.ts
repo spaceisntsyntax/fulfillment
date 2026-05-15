@@ -681,7 +681,7 @@ export class HoldsGridComponent implements OnInit {
         if (rowsModified) {
             this._prev_rows = [];
             // give the grid a chance to render then ask it to reload
-            setTimeout(() => this.holdsGrid.reload());
+            setTimeout(() => {this.holdsGrid.reload()}, 500);
         }
     }
 

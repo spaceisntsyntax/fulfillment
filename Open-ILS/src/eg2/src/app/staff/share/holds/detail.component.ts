@@ -19,6 +19,8 @@ export class HoldDetailComponent implements OnInit {
     notes: IdlObject[] = [];
     notifies: IdlObject[] = [];
 
+    private changes = 0;
+
     private _holdId: number;
     @Input() set holdId(id: number) {
         if (this._holdId !== id) {
@@ -108,12 +110,12 @@ export class HoldDetailComponent implements OnInit {
     }
 
     showListView() {
-        this.onShowList.emit();
+        this.onShowList.emit( !!this.changes );
     }
 
     deleteNote(note: IdlObject) {
         this.pcrud.remove(note).toPromise()
-            .then(ok => { if (ok) { this.getNotes(); } });
+            .then(ok => { if (ok) { this.getNotes(); this.changes++; } });
     }
 
     newNote() {
@@ -121,11 +123,11 @@ export class HoldDetailComponent implements OnInit {
         this.noteDialog.slip = false;
         this.noteDialog.title = '';
         this.noteDialog.body = '';
-        this.noteDialog.open().subscribe(note => this.notes.unshift(note));
+        this.noteDialog.open().subscribe(note => this.notes.unshift(note) && this.changes++);
     }
 
     newNotify() {
-        this.notifyDialog.open().subscribe(notify => this.getNotifies()); // fleshing
+        this.notifyDialog.open().subscribe(notify => this.getNotifies() && this.changes++); // fleshing
     }
 }
 

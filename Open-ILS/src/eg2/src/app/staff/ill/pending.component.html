@@ -4,7 +4,7 @@
   <li ngbNavItem="borrower">
     <a ngbNavLink (click)="navItemClick('borrower', $event)" i18n>Requests By My Patrons</a>
     <ng-template ngbNavContent>
-      <eg-holds-grid pageSize="25"
+      <eg-holds-grid pageSize="25" #borrowerGrid
         persistKey="ff.ill.pending.borrower"
         [illMode]="true"
         [ill_role]="ill_role"
@@ -25,7 +25,7 @@
   <li ngbNavItem="lender">
     <a ngbNavLink (click)="navItemClick('lender', $event)" i18n>Requests From Other Libraries</a>
     <ng-template ngbNavContent>
-      <eg-holds-grid pageSize="25"
+      <eg-holds-grid pageSize="25" #lenderGrid
         persistKey="ff.ill.pending.lender"
         printTemplate="hold_pull_list"
         [illMode]="true"

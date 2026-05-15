@@ -20,6 +20,8 @@ export class PendingRequestsComponent implements OnInit {
     @Input() ill_role: string;
 
     @ViewChild('disallowDialog') private disallowDialog: DisallowItemComponent;
+    @ViewChild('borrowerGrid') private borrowerGrid: HoldsGridComponent;
+    @ViewChild('lenderGrid') private lenderGrid: HoldsGridComponent;
 
     customActions: any[];
 
@@ -50,6 +52,17 @@ export class PendingRequestsComponent implements OnInit {
                 label: $localize`Disallow Request`,
                 method: (rows) => this.popup_block_ill(rows)
             });
+            this.customActions.push({
+                group: 'ILL',
+                label: $localize`Force Metarecord Requests`,
+                method: (rows) => this.force_m_type_lender(rows)
+            });
+        } else {
+            this.customActions.push({
+                group: 'ILL',
+                label: $localize`Force Metarecord Requests`,
+                method: (rows) => this.force_m_type_borrower(rows)
+            });
         }
     }
 
@@ -59,13 +72,25 @@ export class PendingRequestsComponent implements OnInit {
     // Mouse middle-click does, though.  *shrug*
     navItemClick(tab: string, evt: PointerEvent) {
         if (this.ill_role === 'borrower' && tab === 'lender') {
+            this.customActions.pop();
             this.customActions.push({
                 group: 'ILL',
                 label: $localize`Disallow Request`,
                 method: (rows) => this.popup_block_ill(rows)
             });
+            this.customActions.push({
+                group: 'ILL',
+                label: $localize`Force Metarecord Requests`,
+                method: (rows) => this.force_m_type_lender(rows)
+            });
         } else if (this.ill_role === 'lender' && tab === 'borrower') {
             this.customActions.pop();
+            this.customActions.pop();
+            this.customActions.push({
+                group: 'ILL',
+                label: $localize`Force Metarecord Requests`,
+                method: (rows) => this.force_m_type_borrower(rows)
+            });
         }
         evt.preventDefault();
         this.routeToTab(tab, evt.ctrlKey);
@@ -84,6 +109,18 @@ export class PendingRequestsComponent implements OnInit {
 
     suspend_holds(rows: any[]): Promise<any> {
         return this.toggleHoldActive(rows, 't');
+    }
+
+    force_m_type_lender(rows: any[]): Promise<any> {
+        return Promise.all(
+            rows.map(r => this.ill.upgradeToMetarecordHold(r.id))
+        ).then( _ => this.lenderGrid.handleModify(true));
+    }
+
+    force_m_type_borrower(rows: any[]): Promise<any> {
+        return Promise.all(
+            rows.map(r => this.ill.upgradeToMetarecordHold(r.id))
+        ).then( _ => this.borrowerGrid.handleModify(true));
     }
 
     beforeTabChange(evt: NgbNavChangeEvent) {

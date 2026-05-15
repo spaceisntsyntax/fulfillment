@@ -279,6 +279,41 @@ export class ILLService {
 
     }
 
+    upgradeToMetarecordHold(hold_id): Promise<any> {
+        return this.pcrud.retrieve(
+            'ahr', hold_id
+        ).toPromise().then( hold => {
+            switch (hold.hold_type()) {
+                case 'T': // just go up one, to M
+                    return this.pcrud.search(
+                        'mmrsm', { source: hold.target() }, {atomic : true}
+                    ).toPromise().then( maps => {
+                        hold.hold_type('M');
+                        hold.target(maps.metarecord());
+                        return this.pcrud.update(hold).toPromise();
+                    });
+                case 'V': // up to T, then pass
+                    return this.pcrud.retrieve(
+                        'acn', hold.target()
+                    ).toPromise().then( cn => {
+                        hold.hold_type('T');
+                        hold.target(cn.record());
+                        return this.pcrud.update(hold).toPromise().then(_ => this.upgradeToMetarecordHold(hold_id));
+                    });
+                case 'C': // up to V, then pass
+                    return this.pcrud.retrieve(
+                        'acp', hold.target()
+                    ).toPromise().then( cp => {
+                        hold.hold_type('V');
+                        hold.target(cp.call_number());
+                        return this.pcrud.update(hold).toPromise().then(_ => this.upgradeToMetarecordHold(hold_id));
+                    });
+                default: // M, F, R, P, I are allowed to stand
+                    return hold;
+            }
+        });
+    }
+
     resetPatron() {
         this.statusDisplayText = '';
         this.patronSummary = null;
