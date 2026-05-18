@@ -188,7 +188,14 @@
   <div class="col-lg-6">
     <table class="table table-striped table-hover" *ngIf="disposition.hold_blocks.length">
       <thead>
-        <th colspan="4" i18n>ILL blocks for copy</th>
+        <th colspan="5" i18n>ILL blocks for copy</th>
+      </thead>
+      <thead>
+        <th i18n>Start</th>
+        <th i18n>Staff</th>
+        <th i18n>Reason</th>
+        <th i18n>Type</th>
+        <th i18n>End</th>
       </thead>
       <tbody>
         <tr *ngFor="let b of disposition.hold_blocks">
@@ -197,6 +204,8 @@
           <td>{{b.reason()}}</td>
           <td *ngIf="b.hold()" i18n>One request ({{b.hold().id()}})</td>
           <td *ngIf="!b.hold()" i18n>All requests</td>
+          <td *ngIf="b.block_stop()" title="{{b.block_stop()}}">{{b.block_stop() | date:'shortDate'}}</td>
+          <td *ngIf="!b.block_stop()" title="{{b.block_stop()}}" i18n>Never</td>
         </tr>
       </tbody>
     </table>
