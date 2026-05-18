@@ -21,11 +21,12 @@
 
 <ng-template #titleTemplate let-r="row">
   <ng-container *ngIf="r.record">
-    <a *ngIf="!illMode" routerLink="/staff/catalog/record/{{r.record.id()}}">{{r.title}}</a>
-    <a *ngIf="illMode" href="/eg/opac/record/{{r.record.id()}}">{{r.title}}</a>
+    <a *ngIf="!illMode" routerLink="/staff/catalog/record/{{r.copy.call_number().record().id()}}">{{r.title}}</a>
+    <a *ngIf="illMode" target="_blank" href="/eg/opac/record/{{r.copy.call_number().record().id()}}">{{r.title}}</a>
   </ng-container>
   <ng-container *ngIf="!r.record">{{r.title}}</ng-container>
 </ng-template>
+
 <ng-template #barcodeTemplate let-r="row">
   <ng-container *ngIf="r.copy">
     <a *ngIf="!illMode" href="/eg/staff/cat/item/{{r.copy.id()}}">{{r.copy.barcode()}}</a>
