@@ -73,7 +73,7 @@
     %]
     <li class="dropdown-divider"></li>
         [%- END -%]
-    <li class="dropdown-item"><a href="[% href %]" data-recid="[% ctx.bre_id %]" data-action="add">[% bag.name %]</a></li>
+    <li class="dropdown-item"><a href="[% href %]" data-recid="[% ctx.bre_id %]" data-action="add">[% bag.name | html %]</a></li>
     [%
        END;
        END
