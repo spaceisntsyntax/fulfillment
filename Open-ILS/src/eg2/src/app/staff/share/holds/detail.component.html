@@ -9,7 +9,8 @@
   <div class="col-lg-2">
     <button type="button" (click)="showListView()" class="btn btn-info" i18n>List View</button>
   </div>
-  <div class="col-lg-3 fw-bold" i18n><h4>Hold #{{holdId}}</h4></div>
+  <div class="col-lg-3 fw-bold" i18n><h4>Request #{{holdId}}</h4></div>
+  <div class="col-lg-7 fw-bold" i18n><b>{{hold.title}}</b> / <i>{{hold.author}}</i></div>
 </div>
 
 <div class="well-table">
