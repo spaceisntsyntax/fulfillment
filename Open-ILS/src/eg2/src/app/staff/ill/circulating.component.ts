@@ -43,14 +43,14 @@ export class CirculatingComponent implements OnInit{
 
     loadHere(): Promise<any> {
         return this.getCircIds('borrower')
-            .then(circs => this.toMyPatrons.load(circs).toPromise())
-            .then(_ => this.toMyPatrons.reloadGrid());
+            .then(circs => this.toMyPatrons?.load(circs).toPromise())
+            .then(_ => this.toMyPatrons?.reloadGrid());
     }
 
     loadThere(): Promise<any> {
         return this.getCircIds('lender')
-            .then(circs => this.toOtherLibraries.load(circs).toPromise())
-            .then(_ => this.toOtherLibraries.reloadGrid());
+            .then(circs => this.toOtherLibraries?.load(circs).toPromise())
+            .then(_ => this.toOtherLibraries?.reloadGrid());
     }
 
     getCircIds(location: string): Promise<any> {
