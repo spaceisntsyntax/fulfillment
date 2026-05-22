@@ -205,7 +205,10 @@
           <td *ngIf="b.hold()" i18n>One request ({{b.hold().id()}})</td>
           <td *ngIf="!b.hold()" i18n>All requests</td>
           <td *ngIf="b.block_stop()" title="{{b.block_stop()}}">{{b.block_stop() | date:'shortDate'}}</td>
-          <td *ngIf="!b.block_stop()" title="{{b.block_stop()}}" i18n>Never</td>
+          <td *ngIf="!b.block_stop()" title="{{b.block_stop()}}">
+              <span *ngIf="!b.hold()" i18n>Never</span>
+              <span *ngIf="b.hold()" i18n></span>
+          </td>
         </tr>
       </tbody>
     </table>
