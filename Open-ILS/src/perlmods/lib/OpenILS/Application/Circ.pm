@@ -2356,7 +2356,7 @@ sub collect_copy_transactions {
         flesh_fields => {
             atc  => ['source', 'dest', 'hold_transit_copy'],
             ahtc => ['hold'],
-            ahr  => ['usr'],
+            ahr  => ['usr','notes'],
             au   => ['card'],
             aou  => ['ill_address']
         }
@@ -2373,7 +2373,7 @@ sub collect_copy_transactions {
     my $hold_flesh = {
         flesh => 3, 
         flesh_fields => {
-            ahr  => ['transit', 'usr', 'cancel_cause'],
+            ahr  => ['transit', 'usr', 'cancel_cause', 'notes'],
             au   => ['card'],
             ahtc => ['source', 'dest']
         }
