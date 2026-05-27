@@ -144,6 +144,12 @@ export class PendingRequestsComponent implements OnInit {
         this.router.navigate(['/staff/catalog/search']);
     }
 
+    private daysFromNow(days: number): string {
+        let d = new Date();
+        d.setDate(Number(d.getDate()) + Number(days));
+        return d.toISOString().substring(0,10);
+    }
+
     async popup_block_ill(rows): Promise<any> {
         const promises = rows.map(row => {
             return this.ill.getTransactionDispositionByBarcode(row.cp_barcode)
@@ -151,6 +157,8 @@ export class PendingRequestsComponent implements OnInit {
                     let disposition = dispoList[0];
 
                     if (disposition) {
+                        this.disallowDialog.blockAmount = this.ill.defaultBlockAmount;
+                        this.disallowDialog.blockStop = '';
                         this.disallowDialog.barcode = disposition.copy.barcode();
                         this.disallowDialog.willCancelTransit = !!disposition.open_transit;
                         this.disallowDialog.currentlyTargeted = !!disposition.open_hold;
@@ -160,7 +168,12 @@ export class PendingRequestsComponent implements OnInit {
                         ).toPromise().then( result => {
                             if (!result.rejected) {
                                 const block_scope = result.blockAll ? 'block_all' : 'block_one';
-                                const block_end = block_scope == 'block_all' ? result.blockStop || null : null;
+                                let block_end = block_scope == 'block_all' ? result.blockStop || null : null;
+                                const block_amount = block_scope == 'block_all' ? result.blockAmount || null : null;
+
+                                if (!block_end && block_amount > 0) { // use block_amount instead of block_end
+                                    block_end = this.daysFromNow(block_amount);
+                                }
 
                                 if (!!disposition.open_transit) {
                                     return this.ill.circAPIRequest(

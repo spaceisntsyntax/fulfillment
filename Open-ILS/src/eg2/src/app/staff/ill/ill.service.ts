@@ -67,6 +67,7 @@ export class ILLService {
     statusDisplayText = '';
     statusDisplaySuccess: boolean;
 
+    defaultBlockAmount: number;
     barcodeRegex: RegExp;
     patronPasswordRequired = false;
     patronIdleTimeout: number;
@@ -99,7 +100,9 @@ export class ILLService {
         private strings: StringService,
         private patrons: PatronService,
         private idl: IdlService,
-    ) {}
+    ) {
+        this.load();
+    }
 
     logoutStaff() {
         this.resetPatron();
@@ -332,9 +335,12 @@ export class ILLService {
             'circ.selfcheck.alert.popup',
             'circ.selfcheck.alert.sound',
             'credit.payments.allow',
+            'ff.ill.default_block_length',
             'circ.selfcheck.block_checkout_on_copy_status'
         ]).then(sets => {
             this.orgSettings = sets;
+
+            this.defaultBlockAmount = sets['ff.ill.default_block_length'] || -1;
 
             const regPattern = sets['opac.barcode_regex'] || /^\d/;
             this.barcodeRegex = new RegExp(regPattern);
@@ -354,9 +360,9 @@ export class ILLService {
 
             // Load a patron by barcode via URL params.
             // Useful for development.
-            const username = this.route.snapshot.queryParamMap.get('patron');
+            //const username = this.route.snapshot.queryParamMap.get('patron');
 
-            return this.loadPatron(username);
+            //return this.loadPatron(username);
         }).catch(_ => {}); // console errors
     }
 

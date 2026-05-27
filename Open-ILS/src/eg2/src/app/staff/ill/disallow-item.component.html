@@ -32,9 +32,22 @@
 
     <div class="row mt-2">
       <div class="col-lg-3 fw-bold" i18n>Block duration</div>
-      <div class="col-lg-9">
+      <div class="col-lg-4">
         <label class="ms-2 form-label form-check-label"
-          for="block-all-end-date" i18n>Block item until</label>
+          for="block-all-end-amount" i18n>Block item for</label>
+        <select class="form-select w-auto" id="blockAmount" [disabled]="!blockAll || !!blockStop" domId="block-all-end-amount" [(ngModel)]="blockAmount">
+          <option i18n value="-1">All Time</option>
+          <option i18n value="1">1 day</option>
+          <option i18n value="3">3 days</option>
+          <option i18n value="7">1 week</option>
+          <option i18n value="14">2 weeks</option>
+          <option i18n value="30">30 days</option>
+          <option i18n value="365">1 year</option>
+        </select>
+      </div>
+      <div class="col-lg-5">
+        <label class="ms-2 form-label form-check-label"
+          for="block-all-end-date" i18n>or until</label>
         <eg-date-select [disabled]="!blockAll" domId="block-all-end-date" (onChangeAsYmd)="blockStop = $event"/>
       </div>
     </div>

@@ -89,9 +89,17 @@ export class SingleScanComponent implements OnInit, AfterViewInit {
         return null;
     }
 
+    private daysFromNow(days: number): string {
+        let d = new Date();
+        d.setDate(Number(d.getDate()) + Number(days));
+        return d.toISOString().substring(0,10);
+    }
+
     async popup_block_ill(active_dispo?: ActionContext): Promise<any> {
         const old = this.swap_dispo(active_dispo);
 
+        this.disallowDialog.blockAmount = this.ill.defaultBlockAmount;
+        this.disallowDialog.blockStop = '';
         this.disallowDialog.barcode = this.disposition.copy.barcode();
         this.disallowDialog.willCancelTransit = this.disposition.open_transit;
         this.disallowDialog.currentlyTargeted = this.disposition.open_hold;
@@ -104,7 +112,12 @@ export class SingleScanComponent implements OnInit, AfterViewInit {
 
         if (!result.rejected) {
             const block_scope = result.blockAll ? 'block_all' : 'block_one';
-            const block_end = block_scope == 'block_all' ? result.blockStop || null : null;
+            let block_end = block_scope == 'block_all' ? result.blockStop || null : null;
+            const block_amount = block_scope == 'block_all' ? result.blockAmount || null : null;
+
+            if (!block_end && block_amount > 0) { // use block_amount instead of block_end
+                block_end = this.daysFromNow(block_amount);
+            }
 
             if (this.disposition.open_transit) {
                 return this.abort_transit().then(() => this[block_scope](result.blockReason, block_end));
