@@ -608,7 +608,7 @@ export class HoldsGridComponent implements OnInit {
 
                     if (this.enablePreFetch) {
                         this._prev_rows.push({...holdData});
-                        if (currentIndex >= pfStart && currentIndex <= pfEnd) {
+                        if (currentIndex >= pfStart && currentIndex < pfEnd) {
                             observer.next(holdData);
                         }
                         currentIndex++;
