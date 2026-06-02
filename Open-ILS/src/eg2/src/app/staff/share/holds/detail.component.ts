@@ -117,6 +117,10 @@ export class HoldDetailComponent implements OnInit {
     }
 
     newNote() {
+        this.noteDialog.pub = false;
+        this.noteDialog.slip = false;
+        this.noteDialog.title = '';
+        this.noteDialog.body = '';
         this.noteDialog.open().subscribe(note => this.notes.unshift(note));
     }
 
