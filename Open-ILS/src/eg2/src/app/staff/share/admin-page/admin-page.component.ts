@@ -5,7 +5,7 @@ import {ActivatedRoute} from '@angular/router';
 import {Location} from '@angular/common';
 import {IdlService, IdlObject} from '@eg/core/idl.service';
 import {FormatService} from '@eg/core/format.service';
-import {GridDataSource, GridColumn} from '@eg/share/grid/grid';
+import {GridDataSource, GridColumn, GridCellTextGenerator} from '@eg/share/grid/grid';
 import {GridComponent} from '@eg/share/grid/grid.component';
 import {TranslateComponent} from '@eg/share/translate/translate.component';
 import {ToastService} from '@eg/share/toast/toast.service';
@@ -46,6 +46,7 @@ export class AdminPageComponent implements OnInit {
     // is provided, a generic one is create which is sufficient for data
     // that requires no special handling, filtering, etc.
     @Input() dataSource: GridDataSource;
+    @Input() cellTextGenerator: GridCellTextGenerator;
 
     // An alternative to a custom data source or template fields; if used,
     // idlClass should be a view over top of idlEditClass, just perhaps with
