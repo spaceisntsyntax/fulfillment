@@ -6,6 +6,7 @@ import {PcrudService} from '@eg/core/pcrud.service';
 import {StoreService} from '@eg/core/store.service';
 import {NgbNav, NgbNavChangeEvent} from '@ng-bootstrap/ng-bootstrap';
 import {AdminPageComponent} from '@eg/staff/share/admin-page/admin-page.component';
+import {GridCellTextGenerator} from '@eg/share/grid/grid';
 import {ILLService} from './ill.service';
 
 @Component({
@@ -22,6 +23,7 @@ export class TransitComponent implements OnInit {
     linkLabels = { borrower: null, lender: null };
     customActions = { borrower: [], lender: [] };
 
+    cellTextGenerator: GridCellTextGenerator;
     constructor(
         private router: Router,
         private ngLocation: Location,
@@ -49,6 +51,13 @@ export class TransitComponent implements OnInit {
     }
 
     ngOnInit() {
+        this.cellTextGenerator = {
+            routing_code:   row => row.dest().routing_code(),
+            barcode:        row => row.target_copy().barcode(),
+            copy_lib:       row => row.target_copy().circ_lib().shortname(),
+            title:          row => row.target_copy().call_number().record().wide_display_entry().title()
+        };
+
         const fullPath = this.org.fullPath(this.contextOrg, true);
         let dest: any = [...fullPath];      // inbound transits
         let circ_lib: any = [...fullPath];  // our copies
