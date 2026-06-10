@@ -46,6 +46,7 @@ export class HoldsGridComponent implements OnInit {
     @Input() hideHoldsCount = false;
 
     @Input() hideILLActions = false;
+    @Input() showDetailsAction = false;
 
     // If either are set/true, the pickup lib selector will display
     @Input() initialPickupLib: number | IdlObject;

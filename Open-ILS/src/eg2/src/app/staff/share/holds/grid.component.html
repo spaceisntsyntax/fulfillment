@@ -170,8 +170,8 @@
         </eg-grid-toolbar-action>
       </ng-container>
 
-      <eg-grid-toolbar-action *ngIf="!hideILLActions"
-        i18n-label label="Show Request Details" i18n-group group="ILL"
+      <eg-grid-toolbar-action *ngIf="!hideILLActions || showDetailsAction"
+        i18n-label label="Add and View Notes" i18n-group group="ILL"
         (onClick)="showDetails($event)"></eg-grid-toolbar-action>
 
       <eg-grid-toolbar-action *ngIf="!illMode || ill_role == 'borrower'"
