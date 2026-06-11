@@ -68,6 +68,11 @@ export class HoldsGridComponent implements OnInit {
 
     @Input() preFetchSetting: string;
 
+    // frozen filtering
+    @Input() frozenFilterSetting: string;
+    @Input() showFrozenFilter = false;
+    frozenFilter = false;
+
     @Input() printTemplate: string;
 
     // Adds a Place Hold grid toolbar button that emits
@@ -250,6 +255,14 @@ export class HoldsGridComponent implements OnInit {
             this.plCompLoaded = true;
         }
 
+        if (this.frozenFilterSetting) {
+            this.store.getItem(this.frozenFilterSetting).then(
+                applied => this.frozenFilter = Boolean(applied)
+            );
+        } else {
+            this.frozenFilter = this.frozenFilter ? true : false;
+        }
+
         if (this.preFetchSetting) {
             this.store.getItem(this.preFetchSetting).then(
                 applied => this.enablePreFetch = Boolean(applied)
@@ -350,6 +363,18 @@ export class HoldsGridComponent implements OnInit {
     // grid have been fetched.
     initComplete(): boolean {
         return this.enablePreFetch !== null;
+    }
+
+    toggleFrozenFilter(apply: boolean) {
+        this.frozenFilter = apply;
+
+        this._prev_rows = [];
+        setTimeout(() => this.holdsGrid.reload());
+
+        if (this.frozenFilterSetting) {
+            // fire and forget
+            this.store.setItem(this.frozenFilterSetting, apply);
+        }
     }
 
     pickupLibChanged(org: IdlObject) {
@@ -465,6 +490,10 @@ export class HoldsGridComponent implements OnInit {
         if (this.pickupLib) {
             filters.pickup_lib =
                 this.org.descendants(this.pickupLib, true);
+        }
+
+        if (this.frozenFilter) {
+            filters['frozen'] = 't';
         }
 
         if (this.pullListOrg) {

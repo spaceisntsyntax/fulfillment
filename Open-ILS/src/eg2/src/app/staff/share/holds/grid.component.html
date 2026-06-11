@@ -151,6 +151,11 @@
         [initialValue]="enablePreFetch" i18n-label label="Pre-Fetch All ILLs">
       </eg-grid-toolbar-checkbox>
 
+      <eg-grid-toolbar-checkbox
+        (onChange)="toggleFrozenFilter($event)" *ngIf="showFrozenFilter"
+        [initialValue]="frozenFilter" i18n-label label="Show only suspended ILLs">
+      </eg-grid-toolbar-checkbox>
+
       <ng-container *ngIf="showPlaceHoldButton">
         <eg-grid-toolbar-button
           i18n-label label="Place Hold" (onClick)="placeHoldRequested.emit()">
