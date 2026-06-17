@@ -12,7 +12,7 @@ my $U = 'OpenILS::Application::AppUtils';
 # unit and returns a ref to a new instance of the connector.
 # This is the main sub called by external modules.
 sub load {
-    my ($class, $org_id) = @_;
+    my ($class, $org_id, @override_disabled) = @_;
 
     return undef unless $org_id;
 
@@ -46,7 +46,7 @@ sub load {
         return undef;
     }
 
-    if ($args{disabled}) {
+    if ($args{disabled} && ! grep { $args{$_} } @override_disabled ) {
         $logger->info("FF connector for ".$args{type}." disabled");
         return;
     }

@@ -344,7 +344,7 @@ __PACKAGE__->register_method(
 
 sub lookup_user {
     my ($self, $client, $ou, $user_barcode, $user_pass) = @_;
-    my $connector = FulfILLment::LAIConnector->load($ou) or return;
+    my $connector = FulfILLment::LAIConnector->load($ou, 'usr_validate_only') or return;
     return $connector->get_user($user_barcode, $user_pass);
 }
 

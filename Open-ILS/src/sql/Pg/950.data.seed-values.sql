@@ -18005,6 +18005,22 @@ VALUES (
 
 INSERT INTO config.org_unit_setting_type (name, label, description, datatype)
 VALUES (
+    'ff.remote.connector.usr_validate_only',
+    oils_i18n_gettext(
+        'ff.remote.connector.usr_validate_only',
+        'LAI: Allow user validation and retrieval when the connector is disabled',
+        'coust', 'label'
+    ),
+    oils_i18n_gettext(
+        'ff.remote.connector.usr_validate_only',
+        'If true, Fulfillment will allow patrons to log in and staff to retrieve remote users even if the connector has been disabled for transactional use',
+        'coust', 'description'
+    ),
+    'bool'
+);
+
+INSERT INTO config.org_unit_setting_type (name, label, description, datatype)
+VALUES (
     'ff.remote.connector.extra.ncip.host',
     oils_i18n_gettext(
         'ff.remote.connector.extra.ncip.host',

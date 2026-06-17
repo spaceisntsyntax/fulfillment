@@ -1,0 +1,3 @@
+<div>
+[% l('Please select the library or group that issued your library card, or that you normally visit.') %]
+</div>

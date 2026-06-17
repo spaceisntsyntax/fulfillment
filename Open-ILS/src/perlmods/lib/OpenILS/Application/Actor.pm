@@ -135,17 +135,22 @@ sub remote_auth_init {
 
     $uhome = $uhome->id;
 
+    my $scoped_home = (
+        $U->ou_ancestor_setting($uhome, 'ff.remote.connector.type')
+        || {org=>$uhome}
+    )->{org};
+
     my $e = new_editor();
     my $user = $e->search_actor_user({
-        usrname => "$uname:$uhome", 
-        home_ou => $uhome,
+        usrname => "$uname:$scoped_home",
+        home_ou => { in => $U->get_org_descendants($scoped_home) },
         # deleted accounts must be re-fetched, updated, and
         # un-deleted in open-ils.actor.remote.authenticate.complete
         deleted => 'f'
     });
 
     return -1 unless @$user; # No local user matching the requested criteria, yet
-    return $U->simplereq( "open-ils.auth", "open-ils.auth.authenticate.init", "$uname:$uhome" );
+    return $U->simplereq( "open-ils.auth", "open-ils.auth.authenticate.init.username", "$uname:$scoped_home" );
 }
 
 __PACKAGE__->register_method(
@@ -160,18 +165,25 @@ sub remote_auth_complete {
 
     $$args{home} = $uhome->id;
 
+    my $scoped_home = (
+        $U->ou_ancestor_setting($$args{home}, 'ff.remote.connector.type')
+        || {org=>$$args{home}}
+    )->{org};
+
     my $ugroup = $U->ou_ancestor_setting_value(
         $$args{home}, 'ff.remote.user_cache.default_group'
     ) || 1;
 
     my $e = new_editor(xact => 1, authtoken => $$args{authtoken});
     my $user = $e->search_actor_user({
-        usrname => "$$args{username}:$$args{home}", 
-        home_ou => $$args{home}
+        usrname => "$$args{username}:$scoped_home",
+        home_ou => { in => $U->get_org_descendants($scoped_home) },
     })->[0];
 
     my $remote_user;
-    if ($U->is_true($U->ou_ancestor_setting_value($$args{home}, 'ff.remote.connector.disabled'))) {
+    if ($U->is_true($U->ou_ancestor_setting_value($$args{home}, 'ff.remote.connector.disabled'))
+        and !$U->is_true($U->ou_ancestor_setting_value($$args{home}, 'ff.remote.connector.usr_validate_only'))
+    ) {
         # non-connector dummy patron, barcode only
         $remote_user = {
             given_name => 'Placeholder',
@@ -200,13 +212,13 @@ sub remote_auth_complete {
         }
     }
 
-    $$args{username} = "$$args{username}:$$args{home}";
+    $$args{username} = "$$args{username}:$scoped_home";
 
     # initial call to .init exited early w/ no seed,
     # so we need to create one now that we have a user
     my $seed = $U->simplereq( 
         "open-ils.auth", 
-        "open-ils.auth.authenticate.init", 
+        "open-ils.auth.authenticate.init.username",
         $$args{username}
     );
 
@@ -235,9 +247,14 @@ sub create_proxy_user_api {
 
     return undef unless $home;
 
+    my $scoped_home = (
+        $U->ou_ancestor_setting($home, 'ff.remote.connector.type', $e)
+        || {org=>$home}
+    )->{org};
+
     my $card = $e->search_actor_card({
         barcode => $barcode,
-        org => $home
+        org => $scoped_home
     })->[0];
 
     my $user;
@@ -247,11 +264,13 @@ sub create_proxy_user_api {
     }
 
     my $ugroup = $U->ou_ancestor_setting_value(
-        $home, 'ff.remote.user_cache.default_group'
+        $home, 'ff.remote.user_cache.default_group', $e
     ) || 1;
 
     my $remote_user;
-    if ($U->is_true($U->ou_ancestor_setting_value($home, 'ff.remote.connector.disabled'))) {
+    if ($U->is_true($U->ou_ancestor_setting_value($home, 'ff.remote.connector.disabled', $e))
+        and !$U->is_true($U->ou_ancestor_setting_value($home, 'ff.remote.connector.usr_validate_only', $e))
+    ) {
         # non-connector dummy patron, barcode only
         $remote_user = {
             user_barcode => $barcode,
@@ -280,7 +299,7 @@ sub create_proxy_user_api {
     }
 
     $user = $e->search_actor_user({
-        usrname => "$barcode:$home", 
+        usrname => "$barcode:$scoped_home",
         home_ou => $home
     })->[0];
     return $user;
@@ -303,8 +322,13 @@ sub create_proxy_user {
     my $patron = Fieldmapper::actor::user->new();
     my $card = Fieldmapper::actor::card->new();
 
+    my $scoped_home = (
+        $U->ou_ancestor_setting($$args{home}, 'ff.remote.connector.type', $e)
+        || {org=>$$args{home}}
+    )->{org};
+
     # how we find them locally
-    $patron->usrname( "$$args{username}:$$args{home}" );
+    $patron->usrname( "$$args{username}:$scoped_home" );
     $patron->passwd( $$args{password} );
     $patron->profile( $ugroup );
     $patron->home_ou( $$args{home} );
@@ -325,7 +349,7 @@ sub create_proxy_user {
     $card->isnew(1);
     $card->id(-1);
     $card->usr(-1);
-    $card->org($$args{home});
+    $card->org($scoped_home);
     $card->barcode($$u{user_barcode} || $$u{user_id} || $$args{username});
 
     $patron->cards([$card]);
@@ -384,8 +408,13 @@ sub resurrect_user {
         $user->clear_card;
     }
 
+    my $scoped_home = (
+        $U->ou_ancestor_setting($$args{home}, 'ff.remote.connector.type', $e)
+        || {org=>$$args{home}}
+    )->{org};
+
     $user->deleted('f');
-    $user->usrname("$$args{username}:$$args{home}");
+    $user->usrname("$$args{username}:$scoped_home");
     $user->passwd($$args{password});
     $user->profile($ugroup);
     $user->home_ou($$args{home});
@@ -399,7 +428,7 @@ sub resurrect_user {
     $user->prefix($$u{prefix});
     $user->alias($$u{initials});
     $user->email( $$u{email} );
-    $card->org($$args{home});
+    $card->org($scoped_home);
     $card->barcode($$u{user_barcode} || $$u{user_id} || $$args{username});
 
     $e->update_actor_user($user) or return $e->die_event;
@@ -4097,7 +4126,14 @@ sub retrieve_usr_id_via_barcode_or_usrname {
     }
 
     if ($username) {
-        $user_by_username = $e->search_actor_user({usrname => $username})->[0] or return OpenILS::Event->new( 'ACTOR_USR_NOT_FOUND' );
+        my $scoped_home = (
+            $U->ou_ancestor_setting($e->requestor->ws_ou, 'ff.remote.connector.type', $e)
+            || {org=>$e->requestor->ws_ou}
+        )->{org};
+
+        $user_by_username = $e->search_actor_user({usrname => $username})->[0]
+            || $e->search_actor_user({usrname => "$username:$scoped_home"})->[0]
+            || return OpenILS::Event->new( 'ACTOR_USR_NOT_FOUND' );
 
         $user = $user_by_username;
     }

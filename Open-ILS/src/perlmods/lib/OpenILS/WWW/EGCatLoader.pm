@@ -889,9 +889,6 @@ sub load_login {
                 'open-ils.actor.remote.authenticate.init',
                 $username, $org_unit);
 
-            $args->{password} = $seed == -1 ? 
-                $password :   md5_hex($seed . md5_hex($password));
-
             $args->{home} = $org_unit;
             # FF always uses the username field
             $args->{username} = $args->{barcode} if $args->{barcode};
