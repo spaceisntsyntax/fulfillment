@@ -1,0 +1,24 @@
+[%###### Add the content of this template to the top of your lowhits_purchase.tt2 ######%]
+[%###### It will work with either TPAC or Bootstrap OPAC templates                ######%]
+[%-
+  # !!! Set this to the appropriate Fulfillment hostname
+  ill_host =  'test.fulfillment-ill.org';
+
+  USE CGI = CGI_utf8;
+  params = CGI.params;
+
+  # Make sure it's a metarecord search.
+  params.modifier = 'metabib';
+
+  # Show details up front; set this to 0 to turn that off.
+  params.detail_record_view = '1';
+
+  # Let the ILL server figure out the best location and default highlighting values
+  params.delete('locg');
+  params.delete('show_highlight');
+
+%]
+<p>
+  <strong>[% l("Didn't finding what you are looking for?") %]</strong><br />
+  [% l('You can try your search') %] <a target="_blank" href='[% mkurl('https://' _ ill_host _ '/eg/opac/results', params, []); %]'>[% l('at our ILL Union Catalog!') %]</a>
+</p>

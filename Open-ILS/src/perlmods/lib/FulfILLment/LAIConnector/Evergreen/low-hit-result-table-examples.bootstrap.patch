@@ -1,0 +1,23 @@
+#
+# To apply, copy the baseline `templates-bootstrap/opac/parts/result/table.tt2` template to a customization directory, adjust the all paths in the command, and run:
+#
+#   ( cd /fulfillment/var/CUSTOM_BOOTSTRAP_DIR && patch -p2 < /PATH/TO/low-hit-result-table-examples.bootstrap.patch )
+#
+diff --git a/templates-bootstrap/opac/parts/result/table.tt2 b/templates-bootstrap/opac/parts/result/table.tt2
+index 7b31b521db..f4d3a6e27e 100755
+--- a/templates-bootstrap/opac/parts/result/table.tt2
++++ b/templates-bootstrap/opac/parts/result/table.tt2
+@@ -11,6 +11,13 @@
+     </div>
+ </div>
+ [% END %]
++
++[% IF !ctx.bookbag && ctx.records.size < 4 # Adjust as desired for low-count limit %]
++<div class="text-center">
++   [% INCLUDE "opac/parts/result/lowhits_purchase.tt2" %]
++</div>
++[% END %]
++
+ <div class="row flex-row-reverse">
+     
+     <div id="result_table_div" class="col-12 col-lg-9 col-xl-10">

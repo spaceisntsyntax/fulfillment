@@ -1,0 +1,23 @@
+#
+# To apply, copy the baseline `templates/opac/parts/result/table.tt2` template to a customization directory, adjust the all paths in the command, and run:
+#
+#   ( cd /fulfillment/var/CUSTOM_TPAC_DIR && patch -p2 < /PATH/TO/low-hit-result-table-examples.tpac.patch )
+#
+diff --git a/templates/opac/parts/result/table.tt2 b/templates/opac/parts/result/table.tt2
+index 7b4506f8e2..66404e7540 100644
+--- a/templates/opac/parts/result/table.tt2
++++ b/templates/opac/parts/result/table.tt2
+@@ -19,6 +19,13 @@
+     <div class="result-bookbag-description">[% ctx.bookbag.description | html %]</div>
+ </div>
+ [% END %]
++
++[% IF !ctx.bookbag && ctx.records.size < 4 # Adjust as desired for low-count limit %]
++<div class="text-center">
++   [% INCLUDE "opac/parts/result/lowhits_purchase.tt2" %]
++</div>
++[% END %]
++
+ <div id="result_table_div">
+     <div class="facet_sidebar_hidden" id="facet_sidebar">
+     [%- IF ctx.is_staff %]
