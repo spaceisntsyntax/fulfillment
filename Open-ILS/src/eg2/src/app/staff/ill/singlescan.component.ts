@@ -452,16 +452,21 @@ export class SingleScanComponent implements OnInit, AfterViewInit {
                 if (dispoList.length > 1) {
                     this.multipleDispositions = dispoList;
                 } else if (dispoList.length === 1) {
-                    this.disposition = dispoList[0];
-                    this.dispositionDetails = this.getDispositionDetails();
-                    if (this.mode === 'ssts') {
-                        this.setFocus('sstsNextActionButton');
-                    }
+                    this.selectOneDispo(dispoList[0]);
                 } else {
                     this.notFound = true;
                 }
 
             });
+    }
+
+    selectOneDispo(active_dispo) {
+        this.disposition = active_dispo;
+        this.dispositionDetails = this.getDispositionDetails();
+        this.multipleDispositions = [];
+        if (this.mode === 'ssts') {
+            this.setFocus('sstsNextActionButton');
+        }
     }
 
     getDispositionDetails(active_dispo?: ActionContext, action?: string): DispositionDetail {

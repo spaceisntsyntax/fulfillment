@@ -257,6 +257,9 @@ export class ILLService {
 
             return dispoList;
         }).then(list => {
+            if (!list || list.length == 0) {
+                return [];
+            }
             return this.pcrud.search(
                 'acbh', {item: list.map(i => i.copy.id()), hold:null},
                 {}, {atomic: true}
