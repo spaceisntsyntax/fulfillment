@@ -3599,6 +3599,8 @@ static char* searchFunctionPredicate( const char* class_alias, osrfHash* field,
 static char* searchFieldTransform( const char* class_alias, osrfHash* field,
 		const jsonObject* node ) {
 	growing_buffer* sql_buf = osrf_buffer_init( 32 );
+	int func_item_index = 0;
+	jsonObject* func_item;
 
 	if( node->type == JSON_HASH ) {
 		const char* field_transform = jsonObjectGetString(
@@ -3632,12 +3634,24 @@ static char* searchFieldTransform( const char* class_alias, osrfHash* field,
 				return NULL;
 			}
 
-			if( obj_is_true( jsonObjectGetKeyConst( node, "distinct" ) ) ) {
-				osrf_buffer_fadd( sql_buf, "%s(DISTINCT \"%s\".%s",
-					field_transform, class_alias, osrfHashGet( field, "name" ));
-			} else {
-				osrf_buffer_fadd( sql_buf, "%s(\"%s\".%s",
-					field_transform, class_alias, osrfHashGet( field, "name" ));
+			OSRF_BUFFER_ADD( sql_buf, field_transform);
+			OSRF_BUFFER_ADD_CHAR( sql_buf, '(');
+
+			// If it's NOT one of these named window functions, we
+			// MUST supply the field as the first parameter.
+			if (!(jsonObjectGetKeyConst( node, "window" )
+				&& (   !strcmp(field_transform, "row_number")
+					|| !strcmp(field_transform, "rank")
+					|| !strcmp(field_transform, "dense_rank")
+					|| !strcmp(field_transform, "percent_rank")
+					|| !strcmp(field_transform, "cume_dist")
+					|| !strcmp(field_transform, "ntile")
+				)
+			)) {
+				if( obj_is_true( jsonObjectGetKeyConst( node, "distinct" ) ) ) {
+					osrf_buffer_add( sql_buf, "DISTINCT ");
+				}
+				osrf_buffer_fadd( sql_buf, "\"%s\".%s", class_alias, osrfHashGet( field, "name" ));
 			}
 
 			const jsonObject* array = jsonObjectGetKeyConst( node, "params" );
@@ -3650,8 +3664,8 @@ static char* searchFieldTransform( const char* class_alias, osrfHash* field,
 					osrf_buffer_free( sql_buf );
 					return NULL;
 				}
-				int func_item_index = 0;
-				jsonObject* func_item;
+				func_item_index = 0;
+				func_item = NULL;
 				while( (func_item = jsonObjectGetIndex( array, func_item_index++ ))) {
 
 					char* val = jsonObjectToSimpleString( func_item );
@@ -3674,8 +3688,173 @@ static char* searchFieldTransform( const char* class_alias, osrfHash* field,
 
 			osrf_buffer_add( sql_buf, ")" );
 
-			if( transform_subcolumn )
+			if( transform_subcolumn ) {
 				osrf_buffer_fadd( sql_buf, ").\"%s\"", transform_subcolumn );
+			} else {
+				const jsonObject* window_clause = NULL;
+				const jsonObject* window_filter = NULL;
+				const jsonObject* window_partition_list = NULL;
+				const jsonObject* window_order_by = NULL;
+
+				if ((window_clause = jsonObjectGetKeyConst( node, "window" ))) {
+					ClassInfo* window_class_info = search_alias( class_alias );
+
+					// FILTER (WHERE ... ) construct
+					if ((window_filter = jsonObjectGetKeyConst( window_clause, "filter" ))) {
+						if (window_filter->type == JSON_HASH && window_filter->size > 0) {
+							char* filter_pred = searchWHERE( window_filter, window_class_info, AND_OP_JOIN, NULL );
+
+							if (filter_pred) {
+								osrf_buffer_add( sql_buf, " FILTER ( WHERE " );
+								osrf_buffer_add( sql_buf, filter_pred );
+								osrf_buffer_add( sql_buf, " )" );
+								free(filter_pred);
+							}
+						}
+					}
+
+					osrf_buffer_add( sql_buf, " OVER (" );
+
+					// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+					//
+					// NOTE: Partition-by lists for direct window function
+					// definitions can be one of:
+					//   * a single bare string
+					//   * an array of strings
+					//   * an array of hashes with the structure { $class_alias => $field }
+					//
+					// The first two are restricted to the same class (IOW,
+					// forced to use the same class_alias value) as the field
+					// to which the transform (window function) is being
+					// logically applied.
+					//
+					// The third form can, obviously, name another query-
+					// local table alias (usually the class hint).
+					//
+					// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+					// If there is a PARTITION BY list, first we add that
+					if ((window_partition_list = jsonObjectGetKeyConst( window_clause, "partition_by" ))) {
+						osrf_buffer_add( sql_buf, " PARTITION BY " );
+
+						if (window_partition_list->type == JSON_ARRAY) {
+
+							func_item_index = 0;
+							func_item = NULL;
+
+							int added_partition_by_item = 0;
+							while( (func_item = jsonObjectGetIndex( window_partition_list, func_item_index++ ))) {
+								if (added_partition_by_item) {
+									OSRF_BUFFER_ADD_CHAR( sql_buf, ',' );
+									added_partition_by_item = 0;
+								}
+
+								char* val = NULL;
+								if (func_item->type == JSON_STRING) {
+									char* val = jsonObjectToSimpleString( func_item );
+
+									if (is_identifier( val )) {
+										osrf_buffer_fadd( sql_buf, "\"%s\".%s", window_class_info->escaped_alias, val );
+										added_partition_by_item = 1;
+									} else {
+										osrfLogError( OSRF_LOG_MARK,
+												"%s: Error adding partial window partition key string [%s]", modulename, val );
+										if (val) free(val);
+										osrf_buffer_free( sql_buf );
+										return NULL;
+									}
+									free( val );
+
+								} else if (func_item->type == JSON_HASH && func_item->size == 1) { // Only one class->field pair allowed per array entry
+									jsonIterator* pred_itr = jsonNewIterator( func_item );
+
+									if (jsonIteratorHasNext(pred_itr)) {
+										jsonObject* pred_node = jsonIteratorNext(pred_itr);
+
+										if (pred_node->type == JSON_STRING) { // Format: key=>value is class_alias=>field_name
+											val = jsonObjectToSimpleString( func_item );
+											ClassInfo* partition_class_info = search_alias( pred_itr->key );
+
+											if (partition_class_info && val && is_identifier(val) ) {
+												osrf_buffer_fadd( sql_buf, "\"%s\".%s", partition_class_info->escaped_alias, val );
+												added_partition_by_item = 1;
+												free( val );
+											} else {
+												osrfLogError( OSRF_LOG_MARK,
+														"%s: Error adding partial window partition key string for aliased class", modulename, val );
+												if (val) free( val );
+												osrf_buffer_free( sql_buf );
+												return NULL;
+											}
+										}
+									}
+
+									jsonIteratorFree( pred_itr );
+								}
+							}
+
+						} else if (window_partition_list->type == JSON_STRING) {
+
+							char* val = jsonObjectToSimpleString( window_partition_list );
+							if (!is_identifier( val )) {
+								osrfLogError( OSRF_LOG_MARK,
+										"%s: Error quoting window partition key string [%s]", modulename, val );
+								if (val) free(val);
+								osrf_buffer_free( sql_buf );
+								return NULL;
+							}
+							osrf_buffer_fadd( sql_buf, "\"%s\".%s", class_alias, val );
+							free( val );
+
+						} else {
+							osrfLogError( OSRF_LOG_MARK,
+									"%s: Error constructing window partition key string, incorrect partition_by type", modulename );
+							osrf_buffer_free( sql_buf );
+							return NULL;
+						}
+					}
+
+					// Then, if there is an ORDER BY list, we add that. The
+					// full power of buildOrderByFromArray() is supported. 
+					if ((window_order_by = jsonObjectGetKeyConst( window_clause, "order_by" ))) {
+						osrf_buffer_add( sql_buf, " ORDER BY " );
+
+						if (window_order_by->type == JSON_ARRAY) {
+
+							char* val = buildOrderByFromArray(NULL, window_order_by);
+							if( val && *val ) {
+								osrf_buffer_add( sql_buf, val );
+								free( val );
+							} else {
+								osrfLogError( OSRF_LOG_MARK,
+									"%s: Error building window order key string", modulename);
+								osrf_buffer_free( sql_buf );
+								return NULL;
+							}
+
+						} else if (window_order_by->type == JSON_STRING) {
+
+							char* val = jsonObjectToSimpleString( window_order_by );
+							if (!is_identifier( val )) {
+								osrfLogError( OSRF_LOG_MARK,
+										"%s: Error quoting window order key string [%s]", modulename, val );
+								if (val) free( val );
+								osrf_buffer_free( sql_buf );
+								return NULL;
+							}
+							osrf_buffer_fadd( sql_buf, "\"%s\".%s", class_alias, val );
+							free( val );
+
+						} else {
+							osrfLogError( OSRF_LOG_MARK,
+									"%s: Error constructing window order key string, incorrect partition_by type", modulename );
+							osrf_buffer_free( sql_buf );
+							return NULL;
+						}
+					}
+					osrf_buffer_add( sql_buf, " )" );
+				}
+			}
 
 		} else {
 			osrf_buffer_fadd( sql_buf, "\"%s\".%s", class_alias, osrfHashGet( field, "name" ));
@@ -5164,16 +5343,16 @@ char* SELECT (
 	int aggregate_found = 0;     // boolean
 
 	// Build a select list
-	if( from_function )   // From a function we select everything
+	if (from_function) {   // From a function we select everything
 		OSRF_BUFFER_ADD_CHAR( select_buf, '*' );
-	else {
+	} else {
 
 		// Build the SELECT list as SQL
-	    int sel_pos = 1;
-	    first = 1;
-	    gfirst = 1;
-	    jsonIterator* selclass_itr = jsonNewIterator( selhash );
-	    while ( (selclass = jsonIteratorNext( selclass_itr )) ) {    // For each class
+		int sel_pos = 1;
+		first = 1;
+		gfirst = 1;
+		jsonIterator* selclass_itr = jsonNewIterator( selhash );
+		while ( (selclass = jsonIteratorNext( selclass_itr )) ) {	// For each class
 
 			const char* cname = selclass_itr->key;
 
@@ -5208,14 +5387,20 @@ char* SELECT (
 				jsonIteratorFree( selclass_itr );
 				osrf_buffer_free( select_buf );
 				osrf_buffer_free( group_buf );
-				if( defaultselhash )
-					jsonObjectFree( defaultselhash );
+				jsonObjectFree( defaultselhash );
 				free( join_clause );
 				if (locale) free(locale);
 				return NULL;
 			}
 
-			if( selclass->type != JSON_ARRAY ) {
+			jsonObject* default_sel_list = NULL;
+			if ((selclass->type == JSON_STRING
+					&& jsonObjectGetString( selclass )
+					&& !strcmp(jsonObjectGetString( selclass ),"*"))
+				|| selclass->type == JSON_NULL
+			) {
+				default_sel_list = defaultSelectList( cname );
+			} else if( selclass->type != JSON_ARRAY ) {
 				osrfLogError(
 					OSRF_LOG_MARK,
 					"%s: Malformed SELECT list for class \"%s\"; not an array",
@@ -5234,20 +5419,26 @@ char* SELECT (
 				jsonIteratorFree( selclass_itr );
 				osrf_buffer_free( select_buf );
 				osrf_buffer_free( group_buf );
-				if( defaultselhash )
-					jsonObjectFree( defaultselhash );
+				jsonObjectFree( defaultselhash );
 				free( join_clause );
 				if (locale) free(locale);
 				return NULL;
 			}
 
 			// Look up some attributes of the current class
-			osrfHash* idlClass        = class_info->class_def;
+			osrfHash* idlClass		= class_info->class_def;
 			osrfHash* class_field_set = class_info->fields;
-			const char* class_pkey    = osrfHashGet( idlClass, "primarykey" );
+			const char* class_pkey	= osrfHashGet( idlClass, "primarykey" );
 			const char* class_tname   = osrfHashGet( idlClass, "tablename" );
 
-			if( 0 == selclass->size ) {
+			unsigned long field_idx = 0;
+			jsonObject* selfield = NULL;
+			jsonObject* sellist = selclass;
+			if (default_sel_list) {
+				sellist = default_sel_list;
+			}
+
+			if( 0 == sellist->size ) {
 				osrfLogWarning(
 					OSRF_LOG_MARK,
 					"%s: No columns selected from \"%s\"",
@@ -5257,9 +5448,7 @@ char* SELECT (
 			}
 
 			// stitch together the column list for the current table alias...
-			unsigned long field_idx = 0;
-			jsonObject* selfield = NULL;
-			while(( selfield = jsonObjectGetIndex( selclass, field_idx++ ) )) {
+			while(( selfield = jsonObjectGetIndex( sellist, field_idx++ ) )) {
 
 				// If we need a separator comma, add one
 				if( first ) {
@@ -5303,8 +5492,8 @@ char* SELECT (
 						jsonIteratorFree( selclass_itr );
 						osrf_buffer_free( select_buf );
 						osrf_buffer_free( group_buf );
-						if( defaultselhash )
-							jsonObjectFree( defaultselhash );
+						jsonObjectFree( defaultselhash );
+						jsonObjectFree( default_sel_list );
 						free( join_clause );
 						if (locale) free(locale);
 						return NULL;
@@ -5328,8 +5517,8 @@ char* SELECT (
 						jsonIteratorFree( selclass_itr );
 						osrf_buffer_free( select_buf );
 						osrf_buffer_free( group_buf );
-						if( defaultselhash )
-							jsonObjectFree( defaultselhash );
+						jsonObjectFree( defaultselhash );
+						jsonObjectFree( default_sel_list );
 						free( join_clause );
 						if (locale) free(locale);
 						return NULL;
@@ -5393,8 +5582,8 @@ char* SELECT (
 						jsonIteratorFree( selclass_itr );
 						osrf_buffer_free( select_buf );
 						osrf_buffer_free( group_buf );
-						if( defaultselhash )
-							jsonObjectFree( defaultselhash );
+						jsonObjectFree( defaultselhash );
+						jsonObjectFree( default_sel_list );
 						free( join_clause );
 						if (locale) free(locale);
 						return NULL;
@@ -5418,8 +5607,8 @@ char* SELECT (
 						jsonIteratorFree( selclass_itr );
 						osrf_buffer_free( select_buf );
 						osrf_buffer_free( group_buf );
-						if( defaultselhash )
-							jsonObjectFree( defaultselhash );
+						jsonObjectFree( defaultselhash );
+						jsonObjectFree( default_sel_list );
 						free( join_clause );
 						if (locale) free(locale);
 						return NULL;
@@ -5431,7 +5620,7 @@ char* SELECT (
 						_alias = jsonObjectGetString( tmp_const );
 					} else if((tmp_const = jsonObjectGetKeyConst( selfield, "result_field" ))) { // Use result_field name as the alias
 						_alias = jsonObjectGetString( tmp_const );
-					} else {         // Use field name as the alias
+					} else {		 // Use field name as the alias
 						_alias = col_name;
 					}
 
@@ -5455,8 +5644,8 @@ char* SELECT (
 							jsonIteratorFree( selclass_itr );
 							osrf_buffer_free( select_buf );
 							osrf_buffer_free( group_buf );
-							if( defaultselhash )
-								jsonObjectFree( defaultselhash );
+							jsonObjectFree( defaultselhash );
+							jsonObjectFree( default_sel_list );
 							free( join_clause );
 							free( clean_alias );
 							if (locale) free(locale);
@@ -5487,8 +5676,7 @@ char* SELECT (
 						}
 					}
 					free(clean_alias);
-				}
-				else {
+				} else {
 					osrfLogError(
 						OSRF_LOG_MARK,
 						"%s: Selected item is unexpected JSON type: %s",
@@ -5506,17 +5694,16 @@ char* SELECT (
 					jsonIteratorFree( selclass_itr );
 					osrf_buffer_free( select_buf );
 					osrf_buffer_free( group_buf );
-					if( defaultselhash )
-						jsonObjectFree( defaultselhash );
+					jsonObjectFree( defaultselhash );
+					jsonObjectFree( default_sel_list );
 					free( join_clause );
 					if (locale) free(locale);
 					return NULL;
 				}
 
-				const jsonObject* agg_obj = jsonObjectGetKeyConst( selfield, "aggregate" );
-				if( obj_is_true( agg_obj ) )
+				if ( obj_is_true(jsonObjectGetKeyConst( selfield, "aggregate" )) ) {
 					aggregate_found = 1;
-				else {
+				} else {
 					// Append a comma (except for the first one)
 					// and add the column to a GROUP BY clause
 					if( gfirst )
@@ -5528,37 +5715,39 @@ char* SELECT (
 				}
 
 #if 0
-			    if (is_agg->size || (flags & SELECT_DISTINCT)) {
+				if (is_agg->size || (flags & SELECT_DISTINCT)) {
 
 					const jsonObject* aggregate_obj = jsonObjectGetKeyConst( selfield, "aggregate");
-				    if ( ! obj_is_true( aggregate_obj ) ) {
-					    if (gfirst) {
-						    gfirst = 0;
-					    } else {
+					if ( ! obj_is_true( aggregate_obj ) ) {
+						if (gfirst) {
+							gfirst = 0;
+						} else {
 							OSRF_BUFFER_ADD_CHAR( group_buf, ',' );
-					    }
+						}
 
-					    osrf_buffer_fadd(group_buf, " %d", sel_pos);
+						osrf_buffer_fadd(group_buf, " %d", sel_pos);
 
 					/*
-				    } else if (is_agg = jsonObjectGetKeyConst( selfield, "having" )) {
-					    if (gfirst) {
-						    gfirst = 0;
-					    } else {
+					} else if (is_agg = jsonObjectGetKeyConst( selfield, "having" )) {
+						if (gfirst) {
+							gfirst = 0;
+						} else {
 							OSRF_BUFFER_ADD_CHAR( group_buf, ',' );
-					    }
+						}
 
-					    _column = searchFieldTransform(class_info->escaped_alias, field, selfield);
+						_column = searchFieldTransform(class_info->escaped_alias, field, selfield);
 						OSRF_BUFFER_ADD_CHAR(group_buf, ' ');
 						OSRF_BUFFER_ADD(group_buf, _column);
-					    _column = searchFieldTransform(class_info->escaped_alias, field, selfield);
+						_column = searchFieldTransform(class_info->escaped_alias, field, selfield);
 					*/
-				    }
-			    }
+					}
+				}
 #endif
 
 				sel_pos++;
 			} // end while -- iterating across SELECT columns
+
+			jsonObjectFree( default_sel_list );
 
 		} // end while -- iterating across classes
 
@@ -5615,7 +5804,11 @@ char* SELECT (
 
 	// Put it all together
 	growing_buffer* sql_buf = osrf_buffer_init( 128 );
-	osrf_buffer_fadd(sql_buf, "SELECT %s FROM %s AS \"%s\" ", col_list, table, core_class );
+	osrf_buffer_add( sql_buf, "SELECT " );
+	if (flags & SELECT_DISTINCT) {
+		osrf_buffer_add( sql_buf, "DISTINCT " );
+	}
+	osrf_buffer_fadd(sql_buf, "%s FROM %s AS \"%s\" ", col_list, table, core_class );
 	free( col_list );
 	free( table );
 
@@ -5792,7 +5985,7 @@ char* SELECT (
 						if( onode->type == JSON_HASH ) {
 							if( jsonObjectGetKeyConst( onode, "transform" ) ) {
 								string = searchFieldTransform(
-									class_itr->key,
+									order_class_info->escaped_alias,
 									osrfHashGet( field_list_def, order_itr->key ),
 									onode
 								);
@@ -5997,7 +6190,7 @@ char* SELECT (
 
 	string = osrf_buffer_release( group_buf );
 
-	if( *string && ( aggregate_found || (flags & SELECT_DISTINCT) ) ) {
+	if( *string && aggregate_found ) {
 		OSRF_BUFFER_ADD( sql_buf, " GROUP BY " );
 		OSRF_BUFFER_ADD( sql_buf, string );
 	}
@@ -6212,9 +6405,9 @@ static char* buildOrderByFromArray( osrfMethodContext* ctx, const jsonObject* or
 
 			osrf_buffer_fadd( order_buf, "(%s)", compare_str );
 			free( compare_str );
-		}
-		else
+		} else {
 			osrf_buffer_fadd( order_buf, "\"%s\".%s", order_class_info->escaped_alias, field );
+		}
 
 		const char* direction =
 			jsonObjectGetString( jsonObjectGetKeyConst( order_spec, "direction" ) );
@@ -8488,9 +8681,9 @@ static ClassInfo* search_alias_in_frame( QueryFrame* frame, const char* target )
 	else {
 		ClassInfo* curr_class = frame->join_list;
 		while( curr_class ) {
-			if( strcmp( target, curr_class->alias ) )
+			if (strcmp( target, curr_class->alias ) && strcmp( target, curr_class->escaped_alias )) {
 				curr_class = curr_class->next;
-			else {
+			} else {
 				found_class = curr_class;
 				break;
 			}
