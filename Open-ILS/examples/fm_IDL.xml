@@ -13802,6 +13802,57 @@ SELECT  usr,
 		</permacrud>
 	</class>
 
+	<class id="ffabcc" controller="open-ils.cstore open-ils.pcrud" oils_obj:fieldmapper="action::bib_circ_counts" oils_persist:readonly="true">
+		<oils_persist:source_definition><![CDATA[
+
+		SELECT
+			circ.id as circ,
+			circ.xact_start AS xact_start,
+			circ.usr AS circ_usr,
+			circ.circ_lib as circ_circ_lib,
+			bre.id as bib,
+			bre.owner as bib_owner,
+			mrsm.metarecord as metarecord,
+			acp.id as item,
+			acp.source_lib as item_source_lib,
+			(circ.phone_renewal OR circ.desk_renewal OR circ.opac_renewal OR circ.auto_renewal) as is_renewal
+		FROM
+			asset.copy acp
+				JOIN action.circulation circ ON (acp.id = circ.target_copy)
+				JOIN asset.call_number acn ON (acn.id = acp.call_number)
+				JOIN biblio.record_entry bre ON (bre.id = acn.record)
+				JOIN metabib.metarecord_source_map mrsm ON (bre.id = mrsm.source)
+
+		]]></oils_persist:source_definition>
+		<fields>
+			<field reporter:label="Circulation ID" name="circ" reporter:datatype="link"/>
+			<field reporter:label="Transaction Start Time" name="xact_start" reporter:datatype="timestamp"/>
+			<field reporter:label="Receiving Patron ID" name="circ_usr" reporter:datatype="link"/>
+			<field reporter:label="Circulating Library" name="circ_circ_lib" reporter:datatype="link"/>
+			<field reporter:label="Bib Record ID" name="bib" reporter:datatype="link"/>
+			<field reporter:label="Bib Record Owner" name="bib_owner" reporter:datatype="link"/>
+			<field reporter:label="Metarecord ID" name="metarecord" reporter:datatype="link"/>
+			<field reporter:label="Item ID" name="item" reporter:datatype="link"/>
+			<field reporter:label="Item Source" name="item_source_lib" reporter:datatype="link"/>
+			<field reporter:label="Renewal" name="is_renewal" reporter:datatype="bool"/>
+		</fields>
+		<links>
+			<link field="circ" reltype="has_a" key="id" map="" class="circ"/>
+			<link field="circ_circ_lib" reltype="has_a" key="id" map="" class="aou"/>
+			<link field="circ_usr" reltype="has_a" key="id" map="" class="au"/>
+			<link field="bib" reltype="has_a" key="id" map="" class="bre"/>
+			<link field="bib_owner" reltype="has_a" key="id" map="" class="aou"/>
+			<link field="metarecord" reltype="has_a" key="id" map="" class="mmr"/>
+			<link field="item" reltype="has_a" key="id" map="" class="acp"/>
+			<link field="item_source_lib" reltype="has_a" key="id" map="" class="aou"/>
+		</links>
+		<permacrud xmlns="http://open-ils.org/spec/opensrf/IDL/permacrud/v1">
+			<actions>
+				<retrieve permission="STAFF_LOGIN" context_field="circ_circ_lib item_source_lib"/>
+			</actions>
+		</permacrud>
+	</class>
+
 	<class id="rodcirc" controller="open-ils.reporter-store" oils_obj:fieldmapper="reporter::overdue_circs" oils_persist:tablename="reporter.overdue_circs" reporter:core="true" reporter:label="Overdue Circulation">
 		<fields oils_persist:primary="id" oils_persist:sequence="money.billable_xact_id_seq">
 			<field reporter:label="Check In Library" name="checkin_lib" reporter:datatype="org_unit"/>
