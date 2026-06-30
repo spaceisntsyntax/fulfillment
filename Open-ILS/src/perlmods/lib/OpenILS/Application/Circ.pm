@@ -31,6 +31,7 @@ use OpenILS::Utils::CStoreEditor q/:funcs/;
 use OpenILS::Const qw/:const/;
 use OpenSRF::Utils::SettingsClient;
 use OpenILS::Application::Cat::AssetCommon;
+use OpenSRF::Utils::JSON;
 
 my $apputils = "OpenILS::Application::AppUtils";
 my $U = $apputils;
@@ -2504,6 +2505,189 @@ sub collect_copy_transactions {
     return \%resp;
 }
 
+__PACKAGE__->register_method(
+	method	  => "top_title_counts",
+	api_name  => "open-ils.circ.statistics.top_title_counts.to_patrons",
+    stream    => 1,
+	signature => {
+        desc => q/Given a location (via workstation org by default)
+                  and an age interval, returns the count by bib and
+                  by metarecord of circulations at the location and
+                  subordinates for each "title" with an age less than
+                  or equal to the interval which were checked out
+                  at location-local org units.
+            /,
+        params => [
+            {desc => 'Authentication token', type => 'string'},
+            {desc => 'Circulation age interval', type => 'string'},
+            {desc => 'Limit', type => 'number'},
+            {desc => 'Offset', type => 'number'},
+            {desc => 'Context Org Unit ID', type => 'number'},
+            {desc => 'Sort options, default: [{local_count => "desc"}, {global_count => "desc"}, {xact_start => "desc"}]', type => 'array'},
+        ],
+        return => {desc => q/
+            Array of hashes, sorted by local count first, followed by
+            global count, then most recent circulation date.
 
+            {   bib         : <bib id>
+                local_count : <count(circ) over (partition by bib)>
+                global_count: <count(circ) over (partition by metarecord)>
+                xact_start  : <first_value(xact_start) over (partition by bib order by xact_start desc)>
+                title       : <mwde.title>
+                author      : <mwde.author>
+                ...
+            }
+        /}
+    }
+);
+
+__PACKAGE__->register_method(
+	method	  => "top_title_counts",
+	api_name  => "open-ils.circ.statistics.top_title_counts.from_items",
+    stream    => 1,
+	signature => {
+        desc => q/Given a location (via workstation org by default)
+                  and an age interval, returns the count by bib and
+                  by metarecord of circulations at the location and
+                  subordinates for each "title" with an age less than
+                  or equal to the interval which circulated location-local
+                  items.
+            /,
+        params => [
+            {desc => 'Authentication token', type => 'string'},
+            {desc => 'Circulation age interval', type => 'string'},
+            {desc => 'Limit', type => 'number'},
+            {desc => 'Offset', type => 'number'},
+            {desc => 'Context Org Unit ID', type => 'number'},
+            {desc => 'Sort options, default: [{local_count => "desc"}, {global_count => "desc"}, {xact_start => "desc"}]', type => 'array'},
+        ],
+        return => {desc => q/
+            Array of hashes, sorted by local count first, followed by
+            global count, then most recent circulation date.
+
+            {   bib         : <bib id>
+                local_count : <count(circ) over (partition by bib)>
+                global_count: <count(circ) over (partition by metarecord)>
+                xact_start  : <first_value(xact_start) over (partition by bib order by xact_start desc)>
+                title       : <mwde.title>
+                author      : <mwde.author>
+                ...
+            }
+        /}
+    }
+);
+
+sub top_title_counts {
+    my ($self, $client, $auth, $age, $limit, $offset, $ctx_ou, $sort_fields) = @_;
+
+    my $e = new_editor(authtoken => $auth);
+    return $e->event unless $e->checkauth;
+    return $e->event unless $e->allowed('STAFF_LOGIN');
+
+    my $base_query = {
+        ( $limit ? ( limit => $limit ) : ()),
+        ( $offset ? ( offset => $offset ) : ()),
+        distinct => 1,
+        from     => 'ffabcc',
+        select   => {
+            ffabcc => [
+                { column    => 'xact_start',
+                  transform => 'first_value',
+                  window    => {
+                    partition_by => 'bib',
+                    order_by     => [{
+                        direction => 'desc',
+                        class     => 'ffabcc',
+                        field     => 'xact_start',
+                    }]
+                  }
+                },
+                { column    => 'circ',
+                  alias     => 'local_count',
+                  transform => 'count',
+                  window    => { partition_by => 'bib' },
+                },
+                { column    => 'circ',
+                  alias     => 'global_count',
+                  transform => 'count',
+                  window    => { partition_by => 'metarecord' },
+                },
+                'bib',
+            ]
+        }
+    };
+
+    my $available_order = {
+        local_count  =>
+            { transform => 'count',  # local count
+              class     => 'ffabcc',
+              field     => 'circ',
+              window    => { partition_by => 'bib' },
+              direction => 'desc'
+            },
+
+        global_count => 
+            { transform => 'count',  # global count
+              class     => 'ffabcc',
+              field     => 'circ',
+              window    => { partition_by => 'metarecord' },
+              direction => 'desc'
+            },
+
+        xact_start   => 
+            { transform => 'first_value',  # most recent xact_start
+              class     => 'ffabcc',
+              field     => 'xact_start',
+              window    => {
+                partition_by => 'bib',
+                order_by     => [{
+                    direction => 'desc',
+                    class     => 'ffabcc',
+                    field     => 'xact_start',
+                }]
+              },
+              direction => 'desc'
+            }
+    };
+
+    $sort_fields = undef unless (ref($sort_fields) and @$sort_fields > 0);
+    $sort_fields ||= [{local_count => 'd'}, {global_count => 'd'}, {xact_start => 'd'}];
+    $sort_fields = [ map { %$_ } @$sort_fields ] if (ref($$sort_fields[0]) =~ /HASH/);
+
+    while (@$sort_fields) {
+        my $f = shift @$sort_fields;
+        my $d = shift @$sort_fields;
+
+        my $sort = $$available_order{$f};
+        $$sort{direction} = $d if $d;
+
+        $$base_query{order_by} ||= [];
+        push @{$$base_query{order_by}}, $sort;
+    }
+
+    $age ||= '1 year';
+    $$base_query{where} = { xact_start => { '<=' => { transform => 'age', value => $age } } };
+
+    $ctx_ou ||= $e->requestor->ws_ou;
+    my $org_ids = $U->get_org_descendants($ctx_ou);
+
+    if ($self->api_name =~ /to_patrons/) {
+        $$base_query{where}{circ_circ_lib} = $org_ids;
+    } elsif ($self->api_name =~ /from_items/) {
+        $$base_query{where}{item_source_lib} = $org_ids;
+    } else {
+        return; # unknown name... 
+    }
+
+    for my $row (@{$e->json_query($base_query)}) {
+        my $wde = $e->retrieve_metabib_wide_display_entry($$row{bib})->to_bare_hash;
+        $client->respond({
+            %$row,
+            map { ($_ => OpenSRF::Utils::JSON->JSON2perl($$wde{$_}))  } keys %$wde
+        });
+    }
+
+    $client->respond_complete;
+}
 
 1;
