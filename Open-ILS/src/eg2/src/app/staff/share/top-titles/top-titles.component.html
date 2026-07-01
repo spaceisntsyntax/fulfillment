@@ -1,0 +1,53 @@
+
+<ng-template #titleTemplate let-row="row">
+  <a *ngIf="!illMode" routerLink="/staff/catalog/record/{{row.bib}}" target="_blank">
+    {{row.title}}
+  </a>
+  <a *ngIf="illMode" href="/eg/opac/record/{{row.bib}}" target="_blank">
+    {{row.title}}
+  </a>
+</ng-template>
+
+<ng-template #multiVal let-row="row" let-col="col" let-parts="userContext">
+  <ul *ngIf="!(parts && parts.length)"><li *ngFor="let v of row[col.name]">{{v}}</li></ul>
+  <ul *ngIf="parts && parts.length">
+    <ng-container *ngFor="let p of parts">
+      <li *ngFor="let v of row[p]">{{v}} ({{p}})</li>
+    </ng-container>
+  </ul>
+</ng-template>
+
+<div class="row mt-3">
+  <div class="col-lg-4">
+    <div class="input-group d-flex flex-wrap">
+      <label for="horizon-select" class="form-label input-group-text" i18n>Requests within the last</label>
+      <select id="horizon-select" class="form-select" [(ngModel)]="ageHorizon" (change)="grid.reload()">
+        <option i18n value="1 week">One Week</option>
+        <option i18n value="1 month">One Month</option>
+        <option i18n value="6 months">Six Months</option>
+        <option i18n value="1 year">One Year</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<eg-grid #grid [dataSource]="dataSource" [sortable]="false"
+  [cellTextGenerator]="cellTextGenerator" [persistKey]="gridPersistKey"
+  [showDeclaredFieldsOnly]="true">
+
+  <eg-grid-column [index]="true" name="bib" label="Record ID" [hidden]="true" i18n-label></eg-grid-column>
+  <eg-grid-column name="title" [cellTemplate]="titleTemplate" label="Title" i18n-label></eg-grid-column>
+  <eg-grid-column i18n-label label="Author" path='author' [hidden]="true"></eg-grid-column>
+  <eg-grid-column i18n-label label="Type of Resource" path='type_of_resource' [hidden]="true"></eg-grid-column>
+
+  <eg-grid-column i18n-label label="Series Title" name='series_title' [cellTemplate]="multiVal" [hidden]="true"></eg-grid-column>
+
+  <eg-grid-column i18n-label label="Identifiers" [cellContext]="['isbn','issn','upc']" name="identifiers" [cellTemplate]="multiVal" [hidden]="true"></eg-grid-column>
+
+  <eg-grid-column i18n-label label="Publication Year" path='pubdate' [hidden]="true"></eg-grid-column>
+  <eg-grid-column name="local_count" label="Local Count" [sortable]="true" [multiSortable]="true" i18n-label></eg-grid-column>
+  <eg-grid-column name="global_count" label="Global Count" [sortable]="true" [multiSortable]="true" i18n-label></eg-grid-column>
+  <eg-grid-column name="xact_start" label="Last ILL" datatype="timestamp" [sortable]="true" [multiSortable]="true" i18n-label></eg-grid-column>
+  <eg-grid-column name="xact_start" label="Last ILL" datatype="timestamp" [sortable]="true" [multiSortable]="true" i18n-label></eg-grid-column>
+
+</eg-grid>

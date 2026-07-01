@@ -10,6 +10,7 @@ import {PendingRequestsComponent} from './pending.component';
 import {TransitComponent} from './transit.component';
 import {OnShelfComponent} from './onshelf.component';
 import {CirculatingComponent} from './circulating.component';
+import {TopTitleListComponent} from './top-title-list.component';
 
 @Component({
     templateUrl: 'ill.component.html',

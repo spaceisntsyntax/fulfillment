@@ -28,6 +28,10 @@
             <option value="circulating/borrower" i18n>To My Patrons</option>
             <option value="circulating/lender" i18n>At Other Libraries</option>
         </optgroup>
+        <optgroup i18n-label label="Top Titles">
+            <option value="top-title-list/borrower" i18n>Requested By My Patrons</option>
+            <option value="top-title-list/lender" i18n>Requests Filled My Items</option>
+        </optgroup>
       </select>
       <button type="button" class="btn btn-outline-dark"
         (keydown.enter)="activateJumpLink()" [disabled]="!jumpLink"
@@ -117,6 +121,14 @@
         <ng-template ngbNavContent>
           <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Currently Circulating"></eg-title>
           <ff-ill-circulating [contextOrg]="contextOrg" [ill_role]="ill_role"/>
+        </ng-template>
+      </li>
+
+      <li ngbNavItem="top-title-list">
+        <a ngbNavLink routerLink="/staff/ill/top-title-list/{{ill_role}}" i18n>Top Titles</a>
+        <ng-template ngbNavContent>
+          <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Top Titles"></eg-title>
+          <ff-ill-top-title-list [contextOrg]="contextOrg" [ill_role]="ill_role"/>
         </ng-template>
       </li>
 

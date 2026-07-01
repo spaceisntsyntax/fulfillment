@@ -1,0 +1,29 @@
+
+<ul ngbNav #topTitlesNav="ngbNav" class="nav-tabs" [activeId]="ill_role" [keyboard]="false" (navChange)="beforeTabChange($event)">
+
+  <li ngbNavItem="borrower">
+    <a ngbNavLink (click)="navItemClick('borrower', $event)" i18n>Requested By My Patrons</a>
+    <ng-template ngbNavContent>
+      <eg-top-titles
+        persistKey="ff.ill.top-titles.to_patrons"
+        orientation="to_patrons"
+        [illMode]="true"
+      />
+    </ng-template>
+  </li>
+
+  <li ngbNavItem="lender">
+    <a ngbNavLink (click)="navItemClick('lender', $event)" i18n>Requests Filled By My Items</a>
+    <ng-template ngbNavContent>
+      <eg-top-titles
+        persistKey="ff.ill.top-titles.from_items"
+        orientation="from_items"
+        [illMode]="true"
+      />
+    </ng-template>
+  </li>
+</ul>
+
+<ng-container>
+  <div [ngbNavOutlet]="topTitlesNav"></div>
+</ng-container>

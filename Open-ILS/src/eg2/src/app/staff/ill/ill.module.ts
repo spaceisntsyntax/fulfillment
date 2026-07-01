@@ -9,11 +9,13 @@ import {OnShelfComponent} from './onshelf.component';
 import {DisallowItemComponent} from './disallow-item.component';
 import {ILLService} from './ill.service';
 import {CirculatingComponent} from './circulating.component';
+import {TopTitleListComponent} from './top-title-list.component';
 import {BarcodesModule} from '@eg/staff/share/barcodes/barcodes.module';
 import {HoldsModule} from '@eg/staff/share/holds/holds.module';
 import {CircModule} from '@eg/staff/share/circ/circ.module';
 import {AdminPageModule} from '@eg/staff/share/admin-page/admin-page.module';
 import {PatronModule} from '@eg/staff/share/patron/patron.module';
+import {TopTitlesModule} from '@eg/staff/share/top-titles/top-titles.module';
 
 @NgModule({
     declarations: [
@@ -24,6 +26,7 @@ import {PatronModule} from '@eg/staff/share/patron/patron.module';
         OnShelfComponent,
         CirculatingComponent,
         DisallowItemComponent,
+        TopTitleListComponent,
     ],
     imports: [
         StaffCommonModule,
@@ -32,6 +35,7 @@ import {PatronModule} from '@eg/staff/share/patron/patron.module';
         CircModule,
         AdminPageModule,
         PatronModule,
+        TopTitlesModule,
     ],
     providers: [
         ILLService,
