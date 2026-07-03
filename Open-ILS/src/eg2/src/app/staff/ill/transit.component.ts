@@ -50,12 +50,16 @@ export class TransitComponent implements OnInit {
         });
     }
 
+    JSONparse(j:string): any {
+        return JSON.parse(j);
+    }
+
     ngOnInit() {
         this.cellTextGenerator = {
             routing_code:   row => row.dest().routing_code(),
             barcode:        row => row.target_copy().barcode(),
             copy_lib:       row => row.target_copy().circ_lib().shortname(),
-            title:          row => row.target_copy().call_number().record().wide_display_entry().title()
+            title:          row => JSON.parse(row.target_copy().call_number().record().wide_display_entry().title())
         };
 
         const fullPath = this.org.fullPath(this.contextOrg, true);
