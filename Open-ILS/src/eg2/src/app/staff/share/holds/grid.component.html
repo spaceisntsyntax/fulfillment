@@ -67,6 +67,49 @@
       </div>
     </div>
 
+    <div class="row" *ngIf="showRecentlyCanceled">
+      <div class="col-lg-5">
+        <div class="input-group">
+          <label for="canceled-horizon-select" class="form-label input-group-text" i18n>Requests canceled since</label>
+          <select id="canceled-horizon-select" class="form-control form-select" [(ngModel)]="recentlyCanceledDays" (change)="saveRecentlyCanceledDays()">
+            <option i18n value="today">Today</option>
+            <option i18n value="1 week">One Week Ago</option>
+            <option i18n value="1 month">One Month Ago</option>
+            <option i18n value="6 months">Six Months Ago</option>
+            <option i18n value="1 year">One Year Ago</option>
+            <option i18n value="0">Settings-based thresholds</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="input-group">
+          <label class="form-label input-group-text" for="canceled-date" i18n>or since</label>
+          <eg-date-select domId="canceled-date" [(ngModel)]="recentlyCanceledDate" (onChangeAsYmd)="saveRecentlyCanceledDate($event)"/>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" *ngIf="overdueFilterSetting">
+      <div class="col-lg-5">
+        <div class="input-group">
+          <label for="overdue-horizon-select" class="form-label input-group-text" i18n>Long Unfilled Age</label>
+          <select id="overdue-horizon-select" class="form-control form-select" [(ngModel)]="overdueFilter" (change)="saveOverdueFilter()">
+            <option i18n value="1 year">One Year Ago</option>
+            <option i18n value="6 months">Six Months Ago</option>
+            <option i18n value="1 month">One Month Ago</option>
+            <option i18n value="1 week">One Week Ago</option>
+            <option i18n value="">No limit</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="input-group">
+          <label class="form-label input-group-text" for="overdue-date" i18n>or older than</label>
+          <eg-date-select domId="overdue-date" [(ngModel)]="overdueDate" (onChangeAsYmd)="saveOverdueDate($event)"/>
+        </div>
+      </div>
+    </div>
+
     <div class="row" *ngIf="!hidePullListLibFilter">
       <div class="col-lg-3 mb-2">
         <div class="input-group">

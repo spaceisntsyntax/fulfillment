@@ -32,6 +32,11 @@
             <option value="top-title-list/borrower" i18n>Requested By My Patrons</option>
             <option value="top-title-list/lender" i18n>Requests Filled My Items</option>
         </optgroup>
+        <optgroup i18n-label label="My Patrons' Requests">
+            <option value="my-requests/canceled" i18n>Recently Canceled</option>
+            <option value="my-requests/suspended" i18n>Suspended</option>
+            <option value="my-requests/overdue" i18n>Long Unfilled</option>
+        </optgroup>
       </select>
       <button type="button" class="btn btn-outline-dark"
         (keydown.enter)="activateJumpLink()" [disabled]="!jumpLink"
@@ -85,7 +90,7 @@
       </li>
 
       <li ngbNavItem="pending">
-        <a ngbNavLink class='nav-link' routerLink="/staff/ill/pending/{{ill_role}}" i18n>Pending Requests</a>
+        <a ngbNavLink class='nav-link' routerLink="/staff/ill/pending/borrower" i18n>Pending Requests</a>
         <ng-template ngbNavContent>
           <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Pending Requests"></eg-title>
           <ff-ill-requests [contextOrg]="contextOrg" [ill_role]="ill_role"/>
@@ -93,7 +98,7 @@
       </li>
 
       <li ngbNavItem="incoming">
-        <a ngbNavLink routerLink="/staff/ill/incoming/{{ill_role}}" i18n>Incoming Transits</a>
+        <a ngbNavLink routerLink="/staff/ill/incoming/borrower" i18n>Incoming Transits</a>
         <ng-template ngbNavContent>
           <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Incoming Transits"></eg-title>
           <ff-transits [contextOrg]="contextOrg" direction="incoming" [ill_role]="ill_role"/>
@@ -101,7 +106,7 @@
       </li>
 
       <li ngbNavItem="outgoing">
-        <a ngbNavLink routerLink="/staff/ill/outgoing/{{ill_role}}" i18n>Outgoing Transits</a>
+        <a ngbNavLink routerLink="/staff/ill/outgoing/borrower" i18n>Outgoing Transits</a>
         <ng-template ngbNavContent>
           <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Outgoing Transits"></eg-title>
           <ff-transits [contextOrg]="contextOrg" direction="outgoing" [ill_role]="ill_role"/>
@@ -109,7 +114,7 @@
       </li>
 
       <li role="presentation" ngbNavItem="onshelf" class='nav-item'>
-        <a ngbNavLink routerLink="/staff/ill/onshelf/{{ill_role}}" i18n>On Shelf</a>
+        <a ngbNavLink routerLink="/staff/ill/onshelf/borrower" i18n>On Shelf</a>
         <ng-template ngbNavContent>
           <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Pending Requests"></eg-title>
           <ff-ill-onshelf [contextOrg]="contextOrg" [ill_role]="ill_role"/>
@@ -117,7 +122,7 @@
       </li>
 
       <li ngbNavItem="circulating">
-        <a ngbNavLink routerLink="/staff/ill/circulating/{{ill_role}}" i18n>Currently Circulating</a>
+        <a ngbNavLink routerLink="/staff/ill/circulating/borrower" i18n>Currently Circulating</a>
         <ng-template ngbNavContent>
           <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Currently Circulating"></eg-title>
           <ff-ill-circulating [contextOrg]="contextOrg" [ill_role]="ill_role"/>
@@ -125,10 +130,18 @@
       </li>
 
       <li ngbNavItem="top-title-list">
-        <a ngbNavLink routerLink="/staff/ill/top-title-list/{{ill_role}}" i18n>Top Titles</a>
+        <a ngbNavLink routerLink="/staff/ill/top-title-list/borrower" i18n>Top Titles</a>
         <ng-template ngbNavContent>
           <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="Top Titles"></eg-title>
           <ff-ill-top-title-list [contextOrg]="contextOrg" [ill_role]="ill_role"/>
+        </ng-template>
+      </li>
+
+      <li ngbNavItem="my-requests">
+        <a ngbNavLink routerLink="/staff/ill/my-requests/canceled" i18n>My Patrons' Requests</a>
+        <ng-template ngbNavContent>
+          <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="My Patrons' Requests"></eg-title>
+          <ff-ill-my-requests [contextOrg]="contextOrg" [ill_role]="ill_role"/>
         </ng-template>
       </li>
 

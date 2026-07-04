@@ -71,7 +71,13 @@ export class HoldsGridComponent implements OnInit {
     // frozen filtering
     @Input() frozenFilterSetting: string;
     @Input() showFrozenFilter = false;
-    frozenFilter = false;
+    @Input() frozenFilter: boolean;
+
+    // long unfilled filtering
+    @Input() overdueFilterSetting: string;
+    @Input() overdueFilter = '1 year';
+    overdueDate: any;
+    overdueDateString: string;
 
     @Input() printTemplate: string;
 
@@ -185,6 +191,10 @@ export class HoldsGridComponent implements OnInit {
 
     // If true, show recently canceled holds only.
     @Input() showRecentlyCanceled = false;
+    @Input() recentlyCanceledFilterSetting: string;
+    recentlyCanceledDays = 'today';
+    recentlyCanceledDate: any;
+    recentlyCanceledDateString: string;
 
     // If true, do NOT show captured holds
     @Input() excludeCaptured = false;
@@ -261,6 +271,18 @@ export class HoldsGridComponent implements OnInit {
             );
         } else {
             this.frozenFilter = this.frozenFilter ? true : false;
+        }
+
+        if (this.overdueFilterSetting) {
+            this.store.getItem(this.overdueFilterSetting).then(
+                applied => this.overdueFilter = applied ? applied : this.overdueFilter
+            );
+        }
+
+        if (this.recentlyCanceledFilterSetting) {
+            this.store.getItem(this.recentlyCanceledFilterSetting).then(
+                applied => this.recentlyCanceledDays = applied ? applied : this.recentlyCanceledDays
+            );
         }
 
         if (this.preFetchSetting) {
@@ -436,6 +458,36 @@ export class HoldsGridComponent implements OnInit {
         return !!this.copyLocationClass;
     }
 
+    saveRecentlyCanceledDays() {
+        this.recentlyCanceledDate = null;
+        this.recentlyCanceledDateString = '';
+        if (this.recentlyCanceledFilterSetting) {
+            this.store.setItem(this.recentlyCanceledFilterSetting, this.recentlyCanceledDays);
+        }
+        this.holdsGrid.reload();
+    }
+
+    saveRecentlyCanceledDate(d:string) {
+        this.recentlyCanceledDateString = d;
+        this.recentlyCanceledDays = '0';
+        this.holdsGrid.reload();
+    }
+
+    saveOverdueFilter(val) {
+        this.overdueDate = null;
+        this.overdueDateString = '';
+        if (this.overdueFilterSetting) {
+            this.store.setItem(this.overdueFilterSetting, this.overdueFilter);
+        }
+        this.holdsGrid.reload();
+    }
+
+    saveOverdueDate(d:string) {
+        this.overdueDateString = d;
+        this.overdueFilter = "";
+        this.holdsGrid.reload();
+    }
+
     savePullFilterSettings(): void {
         this.store.setItem('eg.holds.pull_list_filters', {
             copyLocationClass: this.copyLocationClass,
@@ -505,9 +557,8 @@ export class HoldsGridComponent implements OnInit {
             // have no current_copy.  Make sure current_copy is set.
             filters.current_copy = {'is not': null};
 
-            // There are aliases for these (cp_status, cp_circ_lib),
-            // but the API complains when I use them.
-            filters['cp.status'] = {'in':{'select':{'ccs':['id']},'from':'ccs','where':{'holdable':'t','is_available':'t'}}};
+            filters['cs.holdable'] = 't';
+            filters['cs.is_available'] = 't';
             filters['cp.circ_lib'] = this.pullListOrg;
             // Avoid deleted copies AND this uses a database index on copy circ_lib where deleted is false.
             filters['cp.deleted'] = 'f';
@@ -551,7 +602,22 @@ export class HoldsGridComponent implements OnInit {
             filters.usr_id = this.patronId;
         }
 
+        if (this.overdueDateString) {
+            filters.request_time = { '<=': this.overdueDateString };
+        } else if (this.overdueFilterSetting && this.overdueFilter) {
+            filters.request_time = { age: { '>=': this.overdueFilter } };
+        }
+
         return filters;
+    }
+
+    parseInt (thing: any): number {
+        return parseInt(thing);
+    }
+
+    currentTimeString (): string {
+        const d = new Date();
+        return `${d.getHours()}:${d.getMinutes()}:00`;
     }
 
     fetchHolds(pager: Pager, sort: any[]): Observable<any> {
@@ -570,13 +636,30 @@ export class HoldsGridComponent implements OnInit {
                 subObj[obj.name] = {dir: obj.dir, nulls: 'last'};
                 orderBy.push(subObj);
             });
+        } else {
+            if (this.showRecentlyCanceled) {
+                orderBy.push({cancel_time:{dir:'desc'}});
+            } else if (this.overdueDateString || this.overdueFilterSetting || filters.frozen === 't') {
+                orderBy.push({request_time:{dir:'asc'}});
+            }
         }
 
         const limit = this.enablePreFetch ? null : pager.limit;
         const offset = this.enablePreFetch ? 0 : pager.offset;
         const options: any = {};
+
         if (this.showRecentlyCanceled) {
-            options.recently_canceled = true;
+            if (this.recentlyCanceledDateString) {
+                filters.cancel_time = { '>=': this.recentlyCanceledDateString };
+            } else if (this.recentlyCanceledDays != '0') { // '0' means "use settings"
+                let age_value = this.recentlyCanceledDays;
+                if (age_value === 'today') { // Special treatment to get "age since midnight" 
+                    age_value = this.currentTimeString();
+                }
+                filters.cancel_time = { age: age_value };
+            } else {
+                options.recently_canceled = true;
+            }
         } else {
             filters.cancel_time = null;
         }

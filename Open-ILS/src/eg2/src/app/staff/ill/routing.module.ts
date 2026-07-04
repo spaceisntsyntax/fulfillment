@@ -48,6 +48,10 @@ const routes: Routes = [{
     pathMatch: 'full',
     redirectTo: 'top-title-list/borrower'
 }, {
+    path: 'my-requests',
+    pathMatch: 'full',
+    redirectTo: 'my-requests/canceled'
+}, {
     path: ':activeTab/:ill_role',
     component: ILLComponent
 }];

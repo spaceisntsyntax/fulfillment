@@ -1,0 +1,75 @@
+<ff-disallow-item #disallowDialog/>
+
+<ul ngbNav #holdsNav="ngbNav" class="nav-tabs" [activeId]="ill_role" (navChange)="beforeTabChange($event)" [keyboard]="false">
+  <li ngbNavItem="canceled">
+    <a ngbNavLink (click)="navItemClick('canceled', $event)" i18n>Recently Canceled</a>
+    <ng-template ngbNavContent>
+      <eg-holds-grid pageSize="25" #canceledGrid
+        persistKey="ff.ill.my-requests.canceled"
+        [illMode]="true"
+        [ill_role]="ill_role"
+        [customActions]="customActions"
+        [noLoadProgress]="true"
+        [hideHoldsCount]="false"
+        [showRecentlyCanceled]="true"
+        recentlyCanceledFilterSetting="ff.pending.my-requests.showRecentlyCanceledDays"
+        [enablePreFetch]="true"
+        [hidePickupLibFilter]="true"
+        [hidePullListLibFilter]="true"
+        [initialPickupLib]="contextOrg"
+        [defaultSort]="[{name:'cancel_time',dir:'desc'}, {name:'id',dir:'asc'}]"
+        showFields="id,request_time,cancel_time,title,note_count"
+      />
+    </ng-template>
+  </li>
+
+  <li ngbNavItem="suspended">
+    <a ngbNavLink (click)="navItemClick('suspended', $event)" i18n>Currently Suspended</a>
+    <ng-template ngbNavContent>
+      <eg-holds-grid pageSize="25" #suspendedGrid
+        persistKey="ff.ill.my-requests.suspended"
+        [illMode]="true"
+        [ill_role]="ill_role"
+        [showCaptureAction]="true"
+        [customActions]="customActions"
+        [noLoadProgress]="true"
+        [hideHoldsCount]="false"
+        [enablePreFetch]="true"
+        [frozenFilter]="true"
+        [excludeCaptured]="true"
+        [hidePickupLibFilter]="true"
+        [hidePullListLibFilter]="true"
+        [initialPickupLib]="contextOrg"
+        [defaultSort]="[{name:'request_time',dir:'asc'}, {name:'id',dir:'asc'}]"
+        showFields="id,request_time,frozen,pl_shortname,current_item,title,note_count"
+      />
+    </ng-template>
+  </li>
+
+  <li ngbNavItem="overdue">
+    <a ngbNavLink (click)="navItemClick('overdue', $event)" i18n>Long Unfilled</a>
+    <ng-template ngbNavContent>
+      <eg-holds-grid pageSize="25" #overdueGrid
+        persistKey="ff.ill.my-requests.overdue"
+        [illMode]="true"
+        [ill_role]="ill_role"
+        [showCaptureAction]="true"
+        [customActions]="customActions"
+        [noLoadProgress]="true"
+        [hideHoldsCount]="false"
+        [enablePreFetch]="true"
+        overdueFilterSetting="ff.pending.my-requests.overdueDays"
+        [excludeCaptured]="true"
+        [hidePickupLibFilter]="true"
+        [hidePullListLibFilter]="true"
+        [initialPickupLib]="contextOrg"
+        [defaultSort]="[{name:'request_time',dir:'asc'}, {name:'id',dir:'asc'}]"
+        showFields="id,request_time,current_item,title,note_count"
+      />
+    </ng-template>
+  </li>
+</ul>
+
+<ng-container>
+  <div [ngbNavOutlet]="holdsNav"></div>
+</ng-container>

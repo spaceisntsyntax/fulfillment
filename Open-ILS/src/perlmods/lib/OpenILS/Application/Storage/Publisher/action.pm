@@ -2543,19 +2543,45 @@ SELECT  h.id, h.request_time, h.capture_time, h.fulfillment_time, h.checkin_time
         my $real = $field_map{$r} || $r;
         next if ($r =~ /[^a-z_.]/); # skip obvious bad inputs
 
+        my $op = '=';
         my $not = '';
+
         if (ref($$restrictions{$r}) and ref($$restrictions{$r}) =~ /HASH/) {
-            $not = 'NOT';
-            $$restrictions{$r} = $$restrictions{$r}{not};
+            if (exists $$restrictions{$r}{not}) { # not in-list
+                $not = 'NOT';
+                $$restrictions{$r} = $$restrictions{$r}{not};
+            } elsif (exists $$restrictions{$r}{age}) { # special case for timestamp age, we know what to do
+                $real = "AGE('now',$real)";
+                if (ref($$restrictions{$r}{age}) =~ /HASH/) { # op and value
+                    ($op) = keys(%{$$restrictions{$r}{age}});
+                    next if $op =~ /;/; # skip injection attempts
+                    next if $op =~ /\s+/; # skip injection attempts
+                    $$restrictions{$r} = $$restrictions{$r}{age}{$op};
+                } elsif (!ref($$restrictions{$r}{age})) {
+                    $op = '<='; # op defaults to "less than or equal to" for age -- IOW, find recent
+                    $$restrictions{$r} = $$restrictions{$r}{age};
+                } else {
+                    next; # no idea...
+                }
+            } elsif (scalar(keys(%{$$restrictions{$r}})) == 1) { # op override
+                ($op) = keys(%{$$restrictions{$r}});
+                next if $op =~ /;/; # skip injection attempts
+                next if $op =~ /\s+/; # skip injection attempts
+                $$restrictions{$r} = $$restrictions{$r}{$op};
+
+                # ugh. special case to support recently_canceled logic in Circ/Holds.pm
+                $not = 'NOT' if ($op eq '!=' and not defined($$restrictions{$r}));
+            } else {
+                next; # uh, we don't understand that ... yet
+            }
         }
 
         if (!defined($$restrictions{$r})) { 
             $select .= " AND $real IS $not NULL ";
-        } elsif (ref($$restrictions{$r})) { 
+        } elsif (ref($$restrictions{$r}) and ref($$restrictions{$r}) =~ /ARRAY/) { 
             $select .= " AND $real $not IN (\$_$$\$" . join("\$_$$\$,\$_$$\$", @{$$restrictions{$r}}) . "\$_$$\$)";
         } else {
-            $not = '!' if $not;
-            $select .= " AND $real $not= \$_$$\$$$restrictions{$r}\$_$$\$";
+            $select .= " AND $not($real $op \$_$$\$$$restrictions{$r}\$_$$\$)";
         }
 
         $restricted++;
