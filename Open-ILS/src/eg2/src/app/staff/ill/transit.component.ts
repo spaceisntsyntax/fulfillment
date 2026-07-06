@@ -94,15 +94,13 @@ export class TransitComponent implements OnInit {
             cancel_time : null,
             dest : dest,
             source : source,
-            target_copy : {
-                'in' : {
-                    select: {acp : ['id']},
-                    from : 'acp',
-                    where : {
-                        deleted : 'f',
-                        id : {'=' : {'+atc' : 'target_copy'}},
-                        circ_lib : {'not in' : circ_lib}
-                    }
+            '-exists': {
+                select: {acp : ['id']},
+                from : 'acp',
+                where : {
+                    deleted : 'f',
+                    id : {'=' : {'+atc' : 'target_copy'}},
+                    circ_lib : {'not in' : circ_lib}
                 }
             }
         };
@@ -112,15 +110,13 @@ export class TransitComponent implements OnInit {
             cancel_time : null,
             dest : dest,
             source : source,
-            target_copy : {
-                'in' : {
-                    select: {acp : ['id']},
-                    from : 'acp',
-                    where : {
-                        deleted : 'f',
-                        id : {'=' : {'+atc' : 'target_copy'}},
-                        circ_lib : circ_lib
-                    }
+            '-exists' : {
+                select: {acp : ['id']},
+                from : 'acp',
+                where : {
+                    deleted : 'f',
+                    id : {'=' : {'+atc' : 'target_copy'}},
+                    circ_lib : circ_lib
                 }
             }
         };
