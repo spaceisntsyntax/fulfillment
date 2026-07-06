@@ -40,6 +40,7 @@ export class AdminPageComponent implements OnInit {
 
     // Default sort field, used when no grid sorting is applied.
     @Input() sortField: string;
+    @Input() sortDir: string;
 
     // Data source may be provided by the caller.  This gives the caller
     // complete control over the contents of the grid.  If no data source
@@ -364,6 +365,9 @@ export class AdminPageComponent implements OnInit {
             } else if (this.sortField) {
                 // Default sort field
                 orderBy[this.idlClass] = this.sortField;
+                if (this.sortDir) {
+                    orderBy[this.idlClass] += ' ' + this.sortDir;
+                }
             }
 
             const searchOps = {
