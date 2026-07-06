@@ -2308,9 +2308,12 @@ sub copy_block_hold {
     my $copy = $e->retrieve_asset_copy($copy_id)
         or return $e->die_event;
 
-    my $block = $e->search_action_copy_block_hold({item => $copy_id, hold => $hold_id})->[0];
+    my @active = ( -or => [{block_stop => undef}, {block_stop => {'>=' => 'now'}}] );
+
+    my $block = $e->search_action_copy_block_hold({item => $copy_id, hold => $hold_id, @active})->[0];
+
     if (!$block and $hold_id) { # check for universal block
-        $block = $e->search_action_copy_block_hold({item => $copy_id, hold => undef})->[0];
+        $block = $e->search_action_copy_block_hold({item => $copy_id, hold => undef, @active})->[0];
     }
 
     if (!$block or $stop_date) {
