@@ -8,6 +8,7 @@ import {StoreService} from '@eg/core/store.service';
 import {SingleScanComponent} from './singlescan.component';
 import {PendingRequestsComponent} from './pending.component';
 import {TransitComponent} from './transit.component';
+import {DisallowedComponent} from './disallowed.component';
 import {OnShelfComponent} from './onshelf.component';
 import {CirculatingComponent} from './circulating.component';
 import {TopTitleListComponent} from './top-title-list.component';

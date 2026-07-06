@@ -5,6 +5,7 @@ import {ILLRoutingModule} from './routing.module';
 import {SingleScanComponent} from './singlescan.component';
 import {PendingRequestsComponent} from './pending.component';
 import {TransitComponent} from './transit.component';
+import {DisallowedComponent} from './disallowed.component';
 import {OnShelfComponent} from './onshelf.component';
 import {DisallowItemComponent} from './disallow-item.component';
 import {ILLService} from './ill.service';
@@ -24,6 +25,7 @@ import {TopTitlesModule} from '@eg/staff/share/top-titles/top-titles.module';
         SingleScanComponent,
         PendingRequestsComponent,
         TransitComponent,
+        DisallowedComponent,
         OnShelfComponent,
         CirculatingComponent,
         DisallowItemComponent,

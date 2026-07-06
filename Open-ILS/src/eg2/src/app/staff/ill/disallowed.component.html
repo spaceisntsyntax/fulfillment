@@ -1,0 +1,50 @@
+<ng-template #itemBarcodeTmpl  let-row="row">
+  <a routerLink="/staff/ill/singlescan/{{row.item().barcode()}}">
+    {{row.item().barcode()}}
+  </a>
+</ng-template>
+
+<ng-template #staffTmpl  let-row="row">
+  <span>{{row.staff().usrname()}}</span>
+</ng-template>
+
+<ng-template #copyLibTmpl  let-row="row">
+  <span>{{row.item().circ_lib().shortname()}}</span>
+</ng-template>
+
+<ng-template #titleTmpl  let-row="row">
+  <a href="/eg/opac/record/{{row.item().call_number().record().id()}}" target="_blank">
+    {{JSONparse(row.item().call_number().record().wide_display_entry().title())}}
+  </a>
+</ng-template>
+
+<ul ngbNav #transitNav="ngbNav" class="nav-tabs" [activeId]="ill_role" [keyboard]="false" (navChange)="beforeTabChange($event)">
+
+  <li ngbNavItem="permanent">
+    <a ngbNavLink (click)="navItemClick('permanent', $event)" i18n>Permanently Disallowed Items</a>
+    <ng-template ngbNavContent>
+      <eg-admin-page idlClass="acbh" pageSize="25"
+        persistKey="ff.ill.disallowed.permanent"
+        sortField="block_time"
+        sortDir="desc"
+        fieldOrder="barcode,title,block_time,reason,staff"
+        hideGridFields="id,item,hold"
+        [disableOrgFilter]="true"
+        [disableDelete]="false"
+        [disableEdit]="true"
+        [cellTextGenerator]="cellTextGenerator"
+        [disableCreate]="true"
+        [hideApplyTranslations]="true"
+        [defaultDatePlusTime]="true"
+        [baseFilter]="liveFilter"
+        [baseFlesh]="{depth: 4, fields:{acbh:['item','staff'],acp:['call_number','circ_lib'],acn:['record'],bre:['wide_display_entry']}, select: {bre : ['id']}}"
+        [templateFields]="[{notFilterable: true, notSortable: true, notMultiSortable: true, name: 'reason', label:'Block Reason'},{notFilterable: true, name: 'block_time', label:'Block Time'},{notFilterable: true, notSortable: true, notMultiSortable: true, name: 'staff', label: 'Blocking Staff', template: staffTmpl},{notFilterable: true, notSortable: true, notMultiSortable: true, name: 'barcode', label: 'Item Barcode', template: itemBarcodeTmpl},{notFilterable: true, notSortable: true, notMultiSortable: true, name: 'copy_lib', label: 'Copy Library', template: copyLibTmpl},{notFilterable: true, notSortable: true, notMultiSortable: true, name: 'title', label: 'Title', template: titleTmpl}]"
+      />
+    </ng-template>
+  </li>
+
+</ul>
+
+<ng-container>
+  <div [ngbNavOutlet]="transitNav"></div>
+</ng-container>

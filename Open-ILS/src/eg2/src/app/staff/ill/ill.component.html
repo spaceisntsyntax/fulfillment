@@ -37,6 +37,9 @@
             <option value="my-requests/suspended" i18n>Suspended</option>
             <option value="my-requests/overdue" i18n>Long Unfilled</option>
         </optgroup>
+        <optgroup i18n-label label="My Disallowed Items">
+            <option value="disallowed/permanent" i18n>Permanently Disallowed Items</option>
+        </optgroup>
       </select>
       <button type="button" class="btn btn-outline-dark"
         (keydown.enter)="activateJumpLink()" [disabled]="!jumpLink"
@@ -142,6 +145,14 @@
         <ng-template ngbNavContent>
           <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="My Patrons' Requests"></eg-title>
           <ff-ill-my-requests [contextOrg]="contextOrg" [ill_role]="ill_role"/>
+        </ng-template>
+      </li>
+
+      <li ngbNavItem="disallowed">
+        <a ngbNavLink routerLink="/staff/ill/disallowed/permanent" i18n>My Disallowed Items</a>
+        <ng-template ngbNavContent>
+          <eg-title i18n-prefix i18n-suffix prefix="ILL Management" suffix="My Disallowed Items"></eg-title>
+          <ff-ill-disallowed [contextOrg]="contextOrg" [ill_role]="ill_role"/>
         </ng-template>
       </li>
 
