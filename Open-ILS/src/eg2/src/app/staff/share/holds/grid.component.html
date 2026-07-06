@@ -222,7 +222,7 @@
         i18n-label label="Add and View Notes" i18n-group group="ILL"
         (onClick)="showDetails($event)"></eg-grid-toolbar-action>
 
-      <eg-grid-toolbar-action *ngIf="!illMode || ill_role == 'borrower'"
+      <eg-grid-toolbar-action *ngIf="!illMode || ill_role == 'borrower' || ill_role == 'suspended' || ill_role == 'overdue'"
         i18n-label label="Modify Request(s)" group="ILL" i18n-group
         (onClick)="showManageDialog($event)">
       </eg-grid-toolbar-action>
@@ -260,11 +260,11 @@
         i18n-group group="ILL" i18n-label label="Capture Item" *ngIf="showCaptureAction"
         (onClick)="showCaptureDialog($event)"></eg-grid-toolbar-action>
 
-      <eg-grid-toolbar-action *ngIf="!hideILLActions"
+      <eg-grid-toolbar-action *ngIf="!hideILLActions && !showRecentlyCanceled"
         i18n-group group="ILL" i18n-label label="Retarget Requests"
         (onClick)="showRetargetDialog($event)"></eg-grid-toolbar-action>
 
-      <eg-grid-toolbar-action *ngIf="(!illMode && !showRecentlyCanceled) || (illMode && ill_role=='borrower')"
+      <eg-grid-toolbar-action *ngIf="(!illMode && !showRecentlyCanceled) || (illMode && (ill_role=='borrower' || ill_role=='suspended' || ill_role=='overdue'))"
         i18-group group="ILL" i18n-label label="Cancel Requests"
         (onClick)="showCancelDialog($event)"></eg-grid-toolbar-action>
 
@@ -273,7 +273,7 @@
         (onClick)="showUncancelDialog($event)">
       </eg-grid-toolbar-action>
 
-      <eg-grid-toolbar-action *ngIf="!hideILLActions"
+      <eg-grid-toolbar-action *ngIf="!hideILLActions || ill_role == 'suspended'"
         i18-group group="ILL" i18n-label label="Print Request Details"
         (onClick)="printHolds()"></eg-grid-toolbar-action>
 

@@ -1,4 +1,4 @@
-import {Component, OnInit, Input, ViewChild} from '@angular/core';
+import {Component, Input, ViewChild} from '@angular/core';
 import {lastValueFrom, defaultIfEmpty} from 'rxjs';
 import {HoldsGridComponent} from  '@eg/staff/share/holds/grid.component';
 import {Router, ActivatedRoute, ParamMap} from '@angular/router';
@@ -14,7 +14,7 @@ import {ILLService} from './ill.service';
     templateUrl: 'my-requests.component.html',
     selector: 'ff-ill-my-requests'
 })
-export class MyRequestsComponent implements OnInit {
+export class MyRequestsComponent {
 
     @Input() contextOrg: number;
     @Input() ill_role: string;
@@ -24,7 +24,9 @@ export class MyRequestsComponent implements OnInit {
     @ViewChild('suspendedGrid') private suspendedGrid: HoldsGridComponent;
     @ViewChild('overdueGrid') private overdueGrid: HoldsGridComponent;
 
-    customActions: any[];
+    canceledActions: any[];
+    frozenActions: any[];
+    overdueActions: any[];
 
     constructor(
         private router: Router,
@@ -34,11 +36,13 @@ export class MyRequestsComponent implements OnInit {
         private net: NetService,
         private store: StoreService
     ) {
-        this.customActions = [{
+        this.frozenActions = [{
             group: 'ILL',
             label: $localize`Activate Requests`,
             method: (rows) => this.activate_holds(rows)
-        },{
+        }];
+
+        this.overdueActions = [{
             group: 'ILL',
             label: $localize`Suspend Requests`,
             method: (rows) => this.suspend_holds(rows)
@@ -46,58 +50,11 @@ export class MyRequestsComponent implements OnInit {
 
     }
 
-    ngOnInit() {
-/*
-        if (this.ill_role === 'lender') {
-            this.customActions.push({
-                group: 'ILL',
-                label: $localize`Disallow Request`,
-                method: (rows) => this.popup_block_ill(rows)
-            });
-            this.customActions.push({
-                group: 'ILL',
-                label: $localize`Force Metarecord Requests`,
-                method: (rows) => this.force_m_type_lender(rows)
-            });
-        } else {
-            this.customActions.push({
-                group: 'ILL',
-                label: $localize`Force Metarecord Requests`,
-                method: (rows) => this.force_m_type_borrower(rows)
-            });
-        }
-*/
-    }
-
     // Navigate, opening new tabs when requested via control-click.
     // NOTE: The nav items have routerLinks, but for some reason,
     // control-click on the links does not open them in a new tab.
     // Mouse middle-click does, though.  *shrug*
     navItemClick(tab: string, evt: PointerEvent) {
-
-/*
-        if (this.ill_role === 'borrower' && tab === 'lender') {
-            this.customActions.pop();
-            this.customActions.push({
-                group: 'ILL',
-                label: $localize`Disallow Request`,
-                method: (rows) => this.popup_block_ill(rows)
-            });
-            this.customActions.push({
-                group: 'ILL',
-                label: $localize`Force Metarecord Requests`,
-                method: (rows) => this.force_m_type_lender(rows)
-            });
-        } else if (this.ill_role === 'lender' && tab === 'borrower') {
-            this.customActions.pop();
-            this.customActions.pop();
-            this.customActions.push({
-                group: 'ILL',
-                label: $localize`Force Metarecord Requests`,
-                method: (rows) => this.force_m_type_borrower(rows)
-            });
-        }
-*/
         evt.preventDefault();
         this.routeToTab(tab, evt.ctrlKey);
     }

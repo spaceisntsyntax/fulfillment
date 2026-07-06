@@ -5,14 +5,14 @@
     <a ngbNavLink (click)="navItemClick('canceled', $event)" i18n>Recently Canceled</a>
     <ng-template ngbNavContent>
       <eg-holds-grid pageSize="25" #canceledGrid
-        persistKey="ff.ill.my-requests.canceled"
+        persistKey="ff.ill.myrequests.canceled"
         [illMode]="true"
         [ill_role]="ill_role"
-        [customActions]="customActions"
+        [customActions]="canceledActions"
         [noLoadProgress]="true"
         [hideHoldsCount]="false"
         [showRecentlyCanceled]="true"
-        recentlyCanceledFilterSetting="ff.pending.my-requests.showRecentlyCanceledDays"
+        recentlyCanceledFilterSetting="ff.pending.myrequests.showRecentlyCanceledDays"
         [enablePreFetch]="true"
         [hidePickupLibFilter]="true"
         [hidePullListLibFilter]="true"
@@ -27,13 +27,15 @@
     <a ngbNavLink (click)="navItemClick('suspended', $event)" i18n>Currently Suspended</a>
     <ng-template ngbNavContent>
       <eg-holds-grid pageSize="25" #suspendedGrid
-        persistKey="ff.ill.my-requests.suspended"
+        persistKey="ff.ill.myrequests.suspended"
         [illMode]="true"
         [ill_role]="ill_role"
-        [showCaptureAction]="true"
-        [customActions]="customActions"
+        [customActions]="frozenActions"
+        [hideILLActions]="true"
+        [showDetailsAction]="true"
         [noLoadProgress]="true"
         [hideHoldsCount]="false"
+        [showCaptureAction]="false"
         [enablePreFetch]="true"
         [frozenFilter]="true"
         [excludeCaptured]="true"
@@ -50,15 +52,15 @@
     <a ngbNavLink (click)="navItemClick('overdue', $event)" i18n>Long Unfilled</a>
     <ng-template ngbNavContent>
       <eg-holds-grid pageSize="25" #overdueGrid
-        persistKey="ff.ill.my-requests.overdue"
+        persistKey="ff.ill.myrequests.overdue"
         [illMode]="true"
         [ill_role]="ill_role"
-        [showCaptureAction]="true"
-        [customActions]="customActions"
+        [showCaptureAction]="false"
+        [customActions]="overdueActions"
         [noLoadProgress]="true"
         [hideHoldsCount]="false"
         [enablePreFetch]="true"
-        overdueFilterSetting="ff.pending.my-requests.overdueDays"
+        overdueFilterSetting="ff.pending.myrequests.overdueDays"
         [excludeCaptured]="true"
         [hidePickupLibFilter]="true"
         [hidePullListLibFilter]="true"

@@ -9,45 +9,45 @@ BEGIN;
 INSERT INTO config.workstation_setting_type (name, grp, datatype, label)
 VALUES
 (
-    'eg.grid.ff.ill.top-titles.to_patrons', 'gui', 'object',
+    'eg.grid.ff.ill.toptitles.to_patrons', 'gui', 'object',
     oils_i18n_gettext(
-        'eg.grid.ff.ill.top-titles.to_patrons',
+        'eg.grid.ff.ill.toptitles.to_patrons',
         'Grid Config: ILL Top Titles to my patrons',
         'cwst', 'label')
 ),(
-    'eg.grid.ff.ill.top-titles.from_items', 'gui', 'object',
+    'eg.grid.ff.ill.toptitles.from_items', 'gui', 'object',
     oils_i18n_gettext(
-        'eg.grid.ff.ill.top-titles.from_items',
+        'eg.grid.ff.ill.toptitles.from_items',
         'Grid Config: ILL Top Titles of my items',
         'cwst', 'label')
 ),(
-    'eg.grid.ff.ill.my-requests.canceled', 'gui', 'object',
+    'eg.grid.ff.ill.myrequests.canceled', 'gui', 'object',
     oils_i18n_gettext(
-        'eg.grid.ff.ill.my-requests.canceled',
+        'eg.grid.ff.ill.myrequests.canceled',
         'Grid Config: Recently Canceled ILL Requests',
         'cwst', 'label')
 ),(
-    'eg.grid.ff.ill.my-requests.suspended', 'gui', 'object',
+    'eg.grid.ff.ill.myrequests.suspended', 'gui', 'object',
     oils_i18n_gettext(
-        'eg.grid.ff.ill.my-requests.suspended',
+        'eg.grid.ff.ill.myrequests.suspended',
         'Grid Config: Suspended ILL Requests',
         'cwst', 'label')
 ),(
-    'eg.grid.ff.ill.my-requests.overdue', 'gui', 'object',
+    'eg.grid.ff.ill.myrequests.overdue', 'gui', 'object',
     oils_i18n_gettext(
-        'eg.grid.ff.ill.my-requests.overdue',
+        'eg.grid.ff.ill.myrequests.overdue',
         'Grid Config: Long Unfilled ILL Requests',
         'cwst', 'label')
 ),(
-    'ff.pending.my-requests.overdueDays', 'gui', 'object',
+    'ff.pending.myrequests.overdueDays', 'gui', 'string',
     oils_i18n_gettext(
-        'ff.pending.my-requests.overdueDays',
+        'ff.pending.myrequests.overdueDays',
         'Grid Config: last Long Unfilled filter value',
         'cwst', 'label')
 ),(
-    'ff.pending.my-requests.showRecentlyCanceledDays', 'gui', 'object',
+    'ff.pending.myrequests.showRecentlyCanceledDays', 'gui', 'string',
     oils_i18n_gettext(
-        'ff.pending.my-requests.showRecentlyCanceledDays',
+        'ff.pending.myrequests.showRecentlyCanceledDays',
         'Grid Config: last Recently Canceled filter value',
         'cwst', 'label')
 );
