@@ -3,6 +3,7 @@ import {Observable, EMPTY, from, switchMap} from 'rxjs';
 import {Pager} from '@eg/share/util/pager';
 import {NetService} from '@eg/core/net.service';
 import {AuthService} from '@eg/core/auth.service';
+import {ServerStoreService} from '@eg/core/server-store.service';
 import {GridComponent} from '@eg/share/grid/grid.component';
 import {GridDataSource, GridCellTextGenerator} from '@eg/share/grid/grid';
 
@@ -21,7 +22,10 @@ export class TopTitlesComponent implements OnInit {
     @Input() gridPersistKey: string;
     @Input() illMode = true;
 
-    ageHorizon = '1 year';
+    // long unfilled filtering
+    @Input() ageHorizonSetting: string;
+    @Input() ageHorizon = '1 year';
+
     dataSource: GridDataSource;
     cellTextGenerator: GridCellTextGenerator;
 
@@ -30,11 +34,25 @@ export class TopTitlesComponent implements OnInit {
     constructor(
         private net: NetService,
         private auth: AuthService,
+        private store: ServerStoreService
     ) {
+    }
+
+    saveHorizonFilter() {
+        if (this.ageHorizonSetting) {
+            this.store.setItem(this.ageHorizonSetting, this.ageHorizon);
+        }
+        this.grid.reload();
     }
 
     ngOnInit() {
         this.dataSource = new GridDataSource();
+
+        if (this.ageHorizonSetting) {
+            this.store.getItem(this.ageHorizonSetting).then(
+                applied => this.ageHorizon = applied ? applied : this.ageHorizon
+            );
+        }
 
         this.dataSource.getRows = (pager: Pager, sort: any): Observable<any> => {
 

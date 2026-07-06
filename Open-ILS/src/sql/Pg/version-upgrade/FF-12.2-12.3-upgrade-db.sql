@@ -21,6 +21,18 @@ VALUES
         'Grid Config: ILL Top Titles of my items',
         'cwst', 'label')
 ),(
+    'ff.ill.toptitles.to_patrons.horizon', 'gui', 'string',
+    oils_i18n_gettext(
+        'ff.ill.toptitles.to_patrons.horizon',
+        'Grid Config: last Top Titles: By My Patrons filter value',
+        'cwst', 'label')
+),(
+    'ff.ill.toptitles.from_items.horizon', 'gui', 'string',
+    oils_i18n_gettext(
+        'ff.ill.toptitles.from_items.horizon',
+        'Grid Config: last Top Titles: By My Items filter value',
+        'cwst', 'label')
+),(
     'eg.grid.ff.ill.myrequests.canceled', 'gui', 'object',
     oils_i18n_gettext(
         'eg.grid.ff.ill.myrequests.canceled',
@@ -50,7 +62,7 @@ VALUES
         'ff.pending.myrequests.showRecentlyCanceledDays',
         'Grid Config: last Recently Canceled filter value',
         'cwst', 'label')
-);
+) ON CONFLICT DO NOTHING;
 
 COMMIT;
 

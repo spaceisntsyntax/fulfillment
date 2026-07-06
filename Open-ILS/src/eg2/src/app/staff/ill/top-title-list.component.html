@@ -5,7 +5,8 @@
     <a ngbNavLink (click)="navItemClick('borrower', $event)" i18n>Requested By My Patrons</a>
     <ng-template ngbNavContent>
       <eg-top-titles
-        persistKey="ff.ill.top-titles.to_patrons"
+        persistKey="ff.ill.toptitles.to_patrons"
+        ageHorizonSetting="ff.ill.toptitles.to_patrons.horizon"
         orientation="to_patrons"
         [illMode]="true"
       />
@@ -16,7 +17,8 @@
     <a ngbNavLink (click)="navItemClick('lender', $event)" i18n>Requests Filled By My Items</a>
     <ng-template ngbNavContent>
       <eg-top-titles
-        persistKey="ff.ill.top-titles.from_items"
+        persistKey="ff.ill.toptitles.from_items"
+        ageHorizonSetting="ff.ill.toptitles.from_items.horizon"
         orientation="from_items"
         [illMode]="true"
       />

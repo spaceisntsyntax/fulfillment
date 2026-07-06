@@ -21,7 +21,7 @@
   <div class="col-lg-4">
     <div class="input-group d-flex flex-wrap">
       <label for="horizon-select" class="form-label input-group-text" i18n>Requests within the last</label>
-      <select id="horizon-select" class="form-select" [(ngModel)]="ageHorizon" (change)="grid.reload()">
+      <select id="horizon-select" class="form-select" [(ngModel)]="ageHorizon" (change)="saveHorizonFilter()">
         <option i18n value="1 week">One Week</option>
         <option i18n value="1 month">One Month</option>
         <option i18n value="6 months">Six Months</option>
