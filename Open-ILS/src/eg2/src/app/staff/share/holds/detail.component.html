@@ -23,7 +23,7 @@
     <div class="well-value">{{hold.shelf_time | formatValue:'timestamp'}}</div>
   </div>
   <div class="well-row">
-    <div class="well-label" i18n>Hold Type</div>
+    <div class="well-label" i18n>ILL Type</div>
     <div class="well-value">
       {{hold.hold_type}}
       <!-- TODO: add part data to wide holds 
@@ -48,7 +48,7 @@
         <div *ngSwitchCase="2" i18n>Waiting for Capture</div>
         <div *ngSwitchCase="3" i18n>In Transit</div>
         <div *ngSwitchCase="4" i18n>Ready for Pickup</div>
-        <div *ngSwitchCase="5" i18n>Hold Shelf Delay</div>
+        <div *ngSwitchCase="5" i18n>ILL Shelf Delay</div>
         <div *ngSwitchCase="6" i18n>Canceled</div>
         <div *ngSwitchCase="7" i18n>Suspended</div>
         <div *ngSwitchCase="8" i18n>Wrong Shelf</div>

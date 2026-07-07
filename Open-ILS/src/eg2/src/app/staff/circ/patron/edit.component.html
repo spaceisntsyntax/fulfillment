@@ -309,7 +309,7 @@
   </div>
 
   <!-- example of overriding a field label -->
-  <eg-string #holdAliasString i18n-text text="Holds Alias"></eg-string>
+  <eg-string #holdAliasString i18n-text text="ILL Alias"></eg-string>
   <ng-container *ngTemplateOutlet="fieldRow; context: 
     {args: {template: fieldInput, field: 'alias', overrideLabel: holdAliasString.text}}">
   </ng-container>
@@ -626,7 +626,7 @@
               (ngModelChange)="fieldValueChange('waiver_entries', index, 'place_holds', $event)"
               (change)="afterFieldChange('waiver_entries', index, 'place_holds')"/>
             <label class="form-label form-check-label"
-              for="waiver-holds-{{waiver.id()}}" i18n>Place Holds?</label>
+              for="waiver-holds-{{waiver.id()}}" i18n>Place ILLs?</label>
           </div>
           <div class="form-inline">
             <input class="form-check-input" type="checkbox" 
@@ -646,7 +646,7 @@
               (ngModelChange)="fieldValueChange('waiver_entries', index, 'pickup_hold', $event)"
               (change)="afterFieldChange('waiver_entries', index, 'pickup_hold')"/>
             <label class="form-label form-check-label"
-              for="waiver-pickup-{{waiver.id()}}" i18n>Pick Up Holds?</label>
+              for="waiver-pickup-{{waiver.id()}}" i18n>Pick Up ILLs?</label>
           </div>
           <div class="form-inline">
             <input class="form-check-input" type="checkbox" 

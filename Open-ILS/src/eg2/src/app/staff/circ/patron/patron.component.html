@@ -113,10 +113,10 @@
           <button type="button" role="tab" ngbNavLink (click)="navItemClick('holds', $event)"
             attr.aria-live="polite"
             routerLink="/staff/circ/patron/{{patronId}}/holds" i18n>
-            Holds ({{counts('holds', 'ready')}} / {{counts('holds', 'total')}})
+            ILLs ({{counts('holds', 'ready')}} / {{counts('holds', 'total')}})
           </button>
           <ng-template ngbNavContent>
-            <eg-title i18n-prefix [prefix]="patronTitle('Holds ('+this.counts('holds', 'ready')+' / '+this.counts('holds', 'total')+') for Patron')"></eg-title>
+            <eg-title i18n-prefix [prefix]="patronTitle('ILLs ('+this.counts('holds', 'ready')+' / '+this.counts('holds', 'total')+') for Patron')"></eg-title>
             <eg-patron-holds></eg-patron-holds>
           </ng-template>
         </li>

@@ -4,7 +4,7 @@
 <eg-string key="catalog.record.toast.overlay"
   i18n-text text="Record Overlay Target Set"></eg-string>
 <eg-string key="catalog.record.toast.holdTransfer"
-  i18n-text text="Hold Transfer Target Set"></eg-string>
+  i18n-text text="ILL Transfer Target Set"></eg-string>
 <eg-string key="catalog.record.toast.holdingTransfer"
   i18n-text text="Holding Transfer Target Set"></eg-string>
 <eg-string key="catalog.record.toast.cleared"
@@ -32,10 +32,10 @@
 
   <a routerLink="/staff/catalog/hold/T" [queryParams]="{target: recId}"
     *ngIf="isHoldable" class="btn btn-outline-primary ms-1" i18n>
-    Place Hold
+    Place ILL
   </a>
   <button type="button" class="btn btn-outline-secondary ms-1" *ngIf="!isHoldable" disabled i18n>
-    Place Hold
+    Place ILL
   </button>
 
   <button type="button" class="btn btn-outline-primary ms-1" (click)="addHoldings()" i18n id="add-holdings-btn">
@@ -71,7 +71,7 @@
             (Currently {{targets.overlay.current}})</ng-container>
         </button>
       <button type="button" ngbDropdownItem class="dropdown-item" (click)="mark('holdTransfer')" i18n>
-        Title Hold Transfer<ng-container *ngIf="targets.holdTransfer.current">
+        Title ILL Transfer<ng-container *ngIf="targets.holdTransfer.current">
             (Currently {{targets.holdTransfer.current}})</ng-container>
       </button>
       <button type="button" ngbDropdownItem class="dropdown-item" (click)="mark('holdingTransfer')" i18n>

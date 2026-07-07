@@ -7,10 +7,10 @@
 
 <ng-template #patronSummary>
   <div *ngIf="checkin.patron.alias()">
-    Hold for patron {{checkin.patron.alias()}}
+    ILL for patron {{checkin.patron.alias()}}
   </div>
   <div *ngIf="!checkin.patron.alias()" i18n>
-    Hold for patron {{checkin.patron.family_name()}}, 
+    ILL for patron {{checkin.patron.family_name()}}, 
     {{checkin.patron.first_given_name()}} {{checkin.patron.second_given_name()}}
   </div>
   <div *ngIf="!checkin.patron.alias()">
@@ -69,10 +69,10 @@
 
 <ng-template #holdShelfTmpl>
   <div *ngIf="checkin.hold.behind_desk() === 't'" i18n>
-    This item should be routed to the <strong>Private Holds Shelf</strong>
+    This item should be routed to the <strong>Private ILL Shelf</strong>
   </div>
   <div *ngIf="checkin.hold.behind_desk() === 'f'" i18n>
-    This item should be routed to the <strong>Public Holds Shelf</strong>
+    This item should be routed to the <strong>Public ILL Shelf</strong>
   </div>
   <br/>
 
@@ -131,7 +131,7 @@
   <div class="modal-header">
     <h4>
       <ng-container *ngIf="slip === 'hold_shelf_slip'">
-        <strong i18n>Hold Slip</strong><br/>
+        <strong i18n>ILL Slip</strong><br/>
         <img class="p-2" src="/images/portal/holds.png" i18n-alt alt=""/>
       </ng-container>
       <ng-container *ngIf="slip !== 'hold_shelf_slip'">

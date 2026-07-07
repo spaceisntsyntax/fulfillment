@@ -201,7 +201,7 @@
       (onClick)="openItemStatus($event)"></eg-grid-toolbar-action>
 
     <eg-grid-toolbar-action
-      i18n-group group="Show" i18n-label label="Show Item Holds"
+      i18n-group group="Show" i18n-label label="Show Item ILLs"
       (onClick)="openItemHolds($event)"></eg-grid-toolbar-action>
 
     <eg-grid-toolbar-action
@@ -312,7 +312,7 @@
     <eg-grid-column i18n-label label="Create Date" 
       path="copy.create_date" datatype="timestamp">
     </eg-grid-column>
-    <eg-grid-column i18n-label label="Age Hold Protection" 
+    <eg-grid-column i18n-label label="Age ILL Protection" 
       path="copy.age_protect.name" name="age_protect.name"></eg-grid-column>
     <eg-grid-column i18n-label label="Item Price" 
       path="copy.price" name="price" [hidden]="true"></eg-grid-column>

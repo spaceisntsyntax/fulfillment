@@ -343,7 +343,7 @@ export class HoldsGridComponent implements OnInit {
                     case 4:
                         return $localize`Ready for Pickup`;
                     case 5:
-                        return $localize`Hold Shelf Delay`;
+                        return $localize`ILL Shelf Delay`;
                     case 6:
                         return $localize`Canceled`;
                     case 7:

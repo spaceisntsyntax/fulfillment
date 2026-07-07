@@ -1,7 +1,7 @@
 <eg-staff-banner *ngIf="!isHoldCapture" i18n-bannerText bannerText="Checkin Items">
 </eg-staff-banner>
 
-<eg-staff-banner *ngIf="isHoldCapture" i18n-bannerText bannerText="Capture Holds">
+<eg-staff-banner *ngIf="isHoldCapture" i18n-bannerText bannerText="Capture ILLs">
 </eg-staff-banner>
 
 <eg-mark-damaged-dialog #markDamagedDialog [handleCheckin]="true"></eg-mark-damaged-dialog>
@@ -41,7 +41,7 @@
       <span *ngIf="modifiers.noop"
         class="me-3 pe-3 border-end border-info label-with-material-icon"> 
         <span class="material-icons" aria-hidden="true">block</span>
-        <span class="ps-2" i18n>Suppress Holds and Transits</span>
+        <span class="ps-2" i18n>Suppress ILLs and Transits</span>
       </span>
 
       <span *ngIf="modifiers.void_overdues"
@@ -53,23 +53,23 @@
       <span *ngIf="modifiers.auto_print_holds_transits"
         class="me-3 pe-3 border-end border-info label-with-material-icon">
         <span class="material-icons" aria-hidden="true">print</span>
-        <span class="ps-2" i18n>Auto-Print Hold and Transit Slips</span>
+        <span class="ps-2" i18n>Auto-Print ILL and Transit Slips</span>
       </span>
 
       <span class="me-3 pe-3 border-end border-info" 
-        *ngIf="modifiers.clear_expired" i18n>Clear Holds Shelf</span>
+        *ngIf="modifiers.clear_expired" i18n>Clear ILL Shelf</span>
 
       <ng-container *ngIf="modifiers.retarget_holds">
         <span class="me-3 pe-3 border-end border-info" 
-          *ngIf="modifiers.retarget_holds_all" i18n>Always Retarget Local Holds</span>
+          *ngIf="modifiers.retarget_holds_all" i18n>Always Retarget Local ILLs</span>
         <span class="me-3 pe-3 border-end border-info" 
-          *ngIf="!modifiers.retarget_holds_all" i18n>Retarget Local Holds</span>
+          *ngIf="!modifiers.retarget_holds_all" i18n>Retarget Local ILLs</span>
       </ng-container>
 
       <span *ngIf="modifiers.hold_as_transit"
         class="me-3 pe-3 border-end border-info label-with-material-icon">
         <span class="material-icons" aria-hidden="true">directions_transit</span>
-        <span class="ps-2" i18n>Capture Local Holds As Transits</span>
+        <span class="ps-2" i18n>Capture Local ILLs As Transits</span>
       </span>
 
       <span class="me-3 pe-3 border-end border-info" 
@@ -204,7 +204,7 @@
 
       <eg-grid-toolbar-action
         i18n-group group="Show" i18n-label 
-        label="Show Record Holds"
+        label="Show Record ILLs"
         [disabled]="grid.context.rowSelector.selected().length !== 1"
         (onClick)="showRecordHolds($event)">
       </eg-grid-toolbar-action>
@@ -327,7 +327,7 @@
               class="badge rounded-pill bg-success me-2">&#x2713;</span>
             <span *ngIf="!modifiers.noop" 
               class="badge rounded-pill bg-warning me-2">&#x2717;</span>
-            <span i18n>Suppress Holds and Transits</span>
+            <span i18n>Suppress ILLs and Transits</span>
           </button>
           <button type="button" ngbDropdownItem (click)="toggleMod('void_overdues')">
             <span *ngIf="modifiers.void_overdues" 
@@ -341,21 +341,21 @@
               class="badge rounded-pill bg-success me-2">&#x2713;</span>
             <span *ngIf="!modifiers.auto_print_holds_transits"
               class="badge rounded-pill bg-warning me-2">&#x2717;</span>
-            <span>Auto-Print Hold and Transit Slips</span>
+            <span>Auto-Print ILL and Transit Slips</span>
           </button>
           <button type="button" ngbDropdownItem (click)="toggleMod('clear_expired')">
             <span *ngIf="modifiers.clear_expired" 
               class="badge rounded-pill bg-success me-2">&#x2713;</span>
             <span *ngIf="!modifiers.clear_expired"
               class="badge rounded-pill bg-warning me-2">&#x2717;</span>
-            <span i18n>Clear Holds Shelf</span>
+            <span i18n>Clear ILL Shelf</span>
           </button>
           <button type="button" ngbDropdownItem (click)="toggleMod('retarget_holds')">
             <span *ngIf="modifiers.retarget_holds" 
               class="badge rounded-pill bg-success me-2">&#x2713;</span>
             <span *ngIf="!modifiers.retarget_holds"
               class="badge rounded-pill bg-warning me-2">&#x2717;</span>
-            <span i18n>Retarget Local Holds</span>
+            <span i18n>Retarget Local ILLs</span>
           </button>
           <button type="button" ngbDropdownItem (click)="toggleMod('retarget_holds_all')">
             <span *ngIf="modifiers.retarget_holds_all" 
@@ -369,7 +369,7 @@
               class="badge rounded-pill bg-success me-2">&#x2713;</span>
             <span *ngIf="!modifiers.hold_as_transit"
               class="badge rounded-pill bg-warning me-2">&#x2717;</span>
-            <span i18n>Capture Local Holds As Transits</span>
+            <span i18n>Capture Local ILLs As Transits</span>
           </button>
           <button type="button" ngbDropdownItem (click)="toggleMod('manual_float')">
             <span *ngIf="modifiers.manual_float"

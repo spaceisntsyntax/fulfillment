@@ -31,7 +31,7 @@
         attr.aria-describedby="copy-barcode-{{copy.id}}"
         [queryParams]="{target: copy.id}"
         queryParamsHandling="merge" i18n>
-        Item Hold
+        Item ILL
       </a>
     </div>
     <div>
@@ -39,7 +39,7 @@
         attr.aria-describedby="copy-barcode-{{copy.id}}"
         [queryParams]="{target: copy.call_number}"
         queryParamsHandling="merge" i18n>
-        Call Number Hold
+        Call Number ILL
       </a>
     </div>
   </div>
@@ -81,7 +81,7 @@
     </eg-grid-column>
     <eg-grid-column i18n-label label="Circulation Modifier" path="circ_modifier">
     </eg-grid-column>
-    <eg-grid-column i18n-label label="Age Hold Protection" path="age_protect"
+    <eg-grid-column i18n-label label="Age ILL Protection" path="age_protect"
       [cellTemplate]="ageTemplate">
     </eg-grid-column>
     <eg-grid-column i18n-label label="Active/Create Date" 

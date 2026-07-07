@@ -125,10 +125,10 @@ export class RouteDialogComponent extends DialogComponent {
 
             if (Array.isArray(autoPrintArr)) {
                 this.noAutoPrint['hold_shelf_slip'] =
-                    autoPrintArr.includes('Hold Slip');
+                    autoPrintArr.includes('ILL Slip');
 
                 this.noAutoPrint['hold_transit_slip'] =
-                    autoPrintArr.includes('Hold/Transit Slip');
+                    autoPrintArr.includes('ILL/Transit Slip');
 
                 this.noAutoPrint['transit_slip'] =
                     autoPrintArr.includes('Transit Slip');

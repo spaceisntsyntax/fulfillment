@@ -181,7 +181,7 @@
         </div>
         <div class="row">
           <div class="w-100">
-            <span i18n>Holds:</span> {{summary.holdCount}}
+            <span i18n>ILLs:</span> {{summary.holdCount}}
           </div>
         </div>
       </div>
@@ -223,7 +223,7 @@
                   [ngClass]="summary.isHoldable ? 'btn-success' : 'btn-secondary'"
                   class="btn btn-sm label-with-material-icon small-text-1">
                   <span class="material-icons" aria-hidden="true">check</span>
-                  <span i18n>Place Hold</span>
+                  <span i18n>Place ILL</span>
                 </button>
 
                 <div class="btn-group my-1" ngbDropdown (openChange)="updateBucketList($event)">

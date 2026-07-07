@@ -3,7 +3,7 @@
 
     <li *ngIf="addr(type)" role="presentation" id="{{type}}" ngbNavItem="{{type}}">
       <a role="tab" ngbNavLink i18n>{{type === 'billing_address' ? 'Physical Address' : 
-        (type === 'holds_address' ? 'Holds Address' : 
+        (type === 'holds_address' ? 'ILL Address' : 
         (type === 'mailing_address' ? 'Mailing Address' : 'ILL Address'))}}</a>
       <ng-template ngbNavContent>
         <eg-fm-record-editor idlClass="aoa" readonlyFields="org_unit" 
