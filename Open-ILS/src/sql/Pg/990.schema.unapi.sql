@@ -175,9 +175,10 @@ CREATE OR REPLACE FUNCTION evergreen.ranked_volumes(
             RANK() OVER w
         FROM asset.call_number acn
             JOIN asset.copy acp ON (acn.id = acp.call_number)
-            JOIN descendants AS aou ON (acp.circ_lib = aou.id)
+            LEFT JOIN descendants AS aou ON (acp.circ_lib = aou.id)
             JOIN actor.org_unit AS owning_lib ON (acn.owning_lib = owning_lib.id)
         WHERE acn.record = ANY ($1)
+            AND (aou.id IS NULL OR $2 = (evergreen.org_top()).id)
             AND acn.deleted IS FALSE
             AND acp.deleted IS FALSE
             AND CASE WHEN ('exclude_invisible_acn' = ANY($7)) THEN 
@@ -1333,9 +1334,10 @@ CREATE OR REPLACE FUNCTION unapi.acn ( obj_id BIGINT, format TEXT,  ename TEXT, 
                                         SELECT  unapi.acp( cp.id, 'xml', 'copy', array_remove($4,'acn'), $5, $6, $7, $8, FALSE),
                                             evergreen.rank_cp(cp) AS rank_avail
                                           FROM  asset.copy cp
-                                                JOIN actor.org_unit_descendants( (SELECT id FROM actor.org_unit WHERE shortname = $5), $6) aoud ON (cp.circ_lib = aoud.id)
+                                                LEFT JOIN actor.org_unit_descendants( (SELECT id FROM actor.org_unit WHERE shortname = $5), $6) aoud ON (cp.circ_lib = aoud.id)
                                           WHERE cp.call_number = acn.id
                                               AND cp.deleted IS FALSE
+                                              AND (aoud.id IS NULL OR (evergreen.org_top()).shortname = $5)
                                           ORDER BY rank_avail, COALESCE(cp.copy_number,0), cp.barcode
                                           LIMIT ($7 -> 'acp')::INT
                                           OFFSET ($8 -> 'acp')::INT
@@ -1347,9 +1349,10 @@ CREATE OR REPLACE FUNCTION unapi.acn ( obj_id BIGINT, format TEXT,  ename TEXT, 
                                         SELECT  unapi.acp( cp.id, 'xml', 'copy', array_remove($4,'acn'), $5, $6, $7, $8, FALSE),
                                             evergreen.rank_cp(cp) AS rank_avail
                                           FROM  asset.copy cp
-                                                JOIN actor.org_unit_descendants( (SELECT id FROM actor.org_unit WHERE shortname = $5) ) aoud ON (cp.circ_lib = aoud.id)
+                                                LEFT JOIN actor.org_unit_descendants( (SELECT id FROM actor.org_unit WHERE shortname = $5) ) aoud ON (cp.circ_lib = aoud.id)
                                           WHERE cp.call_number = acn.id
                                               AND cp.deleted IS FALSE
+                                              AND (aoud.id IS NULL OR (evergreen.org_top()).shortname = $5)
                                           ORDER BY rank_avail, COALESCE(cp.copy_number,0), cp.barcode
                                           LIMIT ($7 -> 'acp')::INT
                                           OFFSET ($8 -> 'acp')::INT

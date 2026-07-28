@@ -98,9 +98,9 @@ export class PendingRequestsComponent implements OnInit {
 
     toggleHoldActive(rows: any[], frozen_value: string): Promise<any> {
         return this.ill.circAPIRequest(
-            'open-ils.circ.hold.update.batch',
-            null, rows.map(r => { return {id: r.id, frozen: frozen_value} })
-        );
+            'open-ils.circ.hold.update.batch.atomic',
+            null, [].concat(rows.map(r => { return {id: r.id, frozen: frozen_value} }))
+        ).then( _ => this.borrowerGrid?.handleModify(true)).then( _ => this.lenderGrid?.handleModify(true));
     }
 
     activate_holds(rows: any[]): Promise<any> {

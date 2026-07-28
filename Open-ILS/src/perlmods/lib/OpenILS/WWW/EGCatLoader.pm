@@ -347,6 +347,35 @@ sub load_simple {
     return Apache2::Const::OK;
 }
 
+my $_connector_org_list;
+sub load_connector_org_list {
+    return $_connector_org_list if $_connector_org_list;
+
+    my $self = shift;
+    $_connector_org_list = [
+        grep {
+            $self->ctx->{get_org_setting}->($_, 'ff.remote.connector.type')
+                &&
+            ( !$U->is_true($self->ctx->{get_org_setting}->($_, 'ff.remote.connector.disabled'))
+                  ||
+               $U->is_true($self->ctx->{get_org_setting}->($_, 'ff.remote.connector.usr_validate_only'))
+            )
+        } map { $_->id } @{$self->ctx->{aou_list}->()}
+    ];
+
+    my @missing_ancestors;
+    for my $org (@$_connector_org_list) {
+        for my $parent (@{$U->get_org_ancestors($org, 1)}) {
+            next if (grep { $parent == $_ } @missing_ancestors);
+            next if (grep { $parent == $_ } @$_connector_org_list);
+            push @missing_ancestors, $parent;
+        }
+    }
+    push @$_connector_org_list, @missing_ancestors;
+
+    return $_connector_org_list;
+}
+
 # -----------------------------------------------------------------------------
 # Tests to see if the user is authenticated and sets some common context values
 # -----------------------------------------------------------------------------
@@ -360,6 +389,8 @@ sub load_common {
     if ($self->cgi->cookie(COOKIE_LOGGEDIN)) {
         return $self->redirect_ssl unless $self->cgi->https;
     }
+
+    $ctx->{connector_org_list} = $self->load_connector_org_list;
 
     # XXX Cache this? Makes testing difficult as apache needs a restart.
     my $default_sort = $e->retrieve_config_global_flag('opac.default_sort');
@@ -867,38 +898,17 @@ sub load_login {
             type => ($persist) ? 'persist' : 'opac',
             org => $org_unit,
             agent => 'opac',
-            password => $password
+            password => $password,
+            username => $username
         };
 
-        my $bc_regex = $ctx->{get_org_setting}->($org_unit, 'opac.barcode_regex');
-
-        # To avoid surprises, default to "Barcodes start with digits"
-        $bc_regex = '^\d' unless $bc_regex;
-
-        if ($bc_regex and ($username =~ /$bc_regex/)) {
-            $args->{barcode} = $username;
-        } else {
-            $args->{username} = $username;
-        }
-
         if (!$auth_proxy_enabled) {
-
-            $logger->info("FF TPAC login for $username @ $org_unit");
-            my $seed = $U->simplereq(
-                'open-ils.actor',
-                'open-ils.actor.remote.authenticate.init',
-                $username, $org_unit);
-
-            $args->{home} = $org_unit;
-            # FF always uses the username field
-            $args->{username} = $args->{barcode} if $args->{barcode};
 
             $response = $U->simplereq(
                 'open-ils.actor',
                 'open-ils.actor.remote.authenticate.complete', $args);
 
         } else {
-            $args->{password} = $password;
             $response = $U->simplereq(
                 'open-ils.auth_proxy',
                 'open-ils.auth_proxy.login', $args);

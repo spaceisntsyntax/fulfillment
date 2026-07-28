@@ -160,8 +160,8 @@ __PACKAGE__->register_method(
 sub remote_auth_complete {
     my($self, $client, $args) = @_;
 
-    my $uhome = find_user_lib($$args{home});
-    return $U->DB_UPDATE_FAILED() if (!$uhome);
+    my $uhome = find_user_lib($$args{org});
+    return $U->DB_UPDATE_FAILED() if (!$uhome or !$$args{password});
 
     $$args{home} = $uhome->id;
 
@@ -180,17 +180,12 @@ sub remote_auth_complete {
         home_ou => { in => $U->get_org_descendants($scoped_home) },
     })->[0];
 
+    $$args{password} ||= md5_hex(int(rand(time))); # random password, just so there's something
+
     my $remote_user;
-    if ($U->is_true($U->ou_ancestor_setting_value($$args{home}, 'ff.remote.connector.disabled'))
-        and !$U->is_true($U->ou_ancestor_setting_value($$args{home}, 'ff.remote.connector.usr_validate_only'))
+    if (!$U->is_true($U->ou_ancestor_setting_value($$args{home}, 'ff.remote.connector.disabled'))
+        or $U->is_true($U->ou_ancestor_setting_value($$args{home}, 'ff.remote.connector.usr_validate_only'))
     ) {
-        # non-connector dummy patron, barcode only
-        $remote_user = {
-            given_name => 'Placeholder',
-            surname => 'Proxy',
-        };
-        $$args{password} = md5_hex(int(rand(time))); # random password, just so there's something
-    } else {
         $remote_user = $U->simplereq( 
             "fulfillment.laicore", 
             "fulfillment.laicore.lookup_user", 
@@ -199,10 +194,9 @@ sub remote_auth_complete {
     }
 
     $remote_user = OpenSRF::Utils::JSON->JSON2perl($remote_user) 
-        if (!ref($remote_user)); # XXX arg.... (what's this now?)
+        if ($remote_user and !ref($remote_user)); # XXX arg.... (what's this now?)
 
     if ($remote_user && !$$remote_user{error}) { # create or update a user ...
-        $$args{barcode} = $$remote_user{user_barcode};
         if (!$user) {
             my $evt = create_proxy_user($remote_user, $ugroup, $args, $e);
             return $evt if $evt;
@@ -214,17 +208,7 @@ sub remote_auth_complete {
 
     $$args{username} = "$$args{username}:$scoped_home";
 
-    # initial call to .init exited early w/ no seed,
-    # so we need to create one now that we have a user
-    my $seed = $U->simplereq( 
-        "open-ils.auth", 
-        "open-ils.auth.authenticate.init.username",
-        $$args{username}
-    );
-
-    $$args{password} = md5_hex($seed . md5_hex($$args{password}));
-
-    return $U->simplereq( "open-ils.auth", "open-ils.auth.authenticate.complete", $args );
+    return $U->simplereq("open-ils.auth", "open-ils.auth.login", $args);
 }
 
 __PACKAGE__->register_method(

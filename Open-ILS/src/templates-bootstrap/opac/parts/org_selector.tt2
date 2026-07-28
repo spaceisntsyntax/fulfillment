@@ -80,6 +80,7 @@ BLOCK build_org_selector;
 
             # org and all children are invisible.
             NEXT IF !visible AND inherited_vis AND !ctx.is_staff;
+            NEXT IF !ctx.is_staff AND ctx.connector_org_list.size AND !ctx.connector_org_list.grep('^' _ org_unit.id _ '$').size;
 
             IF !loc_grp; # processing an org unit
 

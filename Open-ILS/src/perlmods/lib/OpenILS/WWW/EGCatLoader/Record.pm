@@ -388,7 +388,7 @@ sub mk_copy_query {
             field => 'id',
             filter => {
                 id => {
-                    in => {
+                    'not in' => {
                         select => {aou => [{
                             column => 'id', 
                             transform => 'actor.org_unit_descendants',

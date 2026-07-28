@@ -3171,14 +3171,14 @@ sub mk_copy_query {
         $rec_id, undef, undef, $copy_limit, $copy_offset, $is_staff
     );
 
-    if ($org) { # TODO: root org test
+    if ($org and $org != 1) { # TODO: better root org test
         # no need to add the org join filter if we're not actually filtering
         $query->{from}->{acp}->[1] = { aou => {
             fkey => 'circ_lib',
             field => 'id',
             filter => {
                 id => {
-                    in => {
+                    'not in' => {
                         select => {aou => [{
                             column => 'id', 
                             transform => 'actor.org_unit_descendants',
@@ -3194,10 +3194,9 @@ sub mk_copy_query {
 
         if ($pref_ou) {
             # Make sure the pref OU is included in the results
-            my $in = $query->{from}->{acp}->[1]->{aou}->{filter}->{id}->{in};
-            delete $query->{from}->{acp}->[1]->{aou}->{filter}->{id};
+            my $in = delete $query->{from}->{acp}->[1]->{aou}->{filter}->{id};
             $query->{from}->{acp}->[1]->{aou}->{filter}->{'-or'} = [
-                {id => {in => $in}},
+                {id => $in},
                 {id => $pref_ou}
             ];
         }
